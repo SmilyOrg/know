@@ -1,4 +1,5 @@
 (function () { "use strict";
+var $estr = function() { return js.Boot.__string_rec(this,''); };
 function $extend(from, fields) {
 	function Inherit() {} Inherit.prototype = from; var proto = new Inherit();
 	for (var name in fields) proto[name] = fields[name];
@@ -56,7 +57,7 @@ var Know = function() {
 	this.outputQuestion = new js.JQuery("#question");
 	this.outputAnswer = new js.JQuery("#answer");
 	this.debug = new js.JQuery("#debug");
-	this.input.val("1/2-1/2");
+	this.input.val("0xA+1+(2/3)^4/5");
 	this.inputChange();
 	var runner = new haxe.unit.TestRunner();
 	runner.add(new test.Test());
@@ -450,11 +451,12 @@ byte.js._ByteData.ByteData_Impl_.ofString = function(s) {
 var haxe = {};
 haxe.StackItem = { __ename__ : true, __constructs__ : ["CFunction","Module","FilePos","Method","LocalFunction"] };
 haxe.StackItem.CFunction = ["CFunction",0];
+haxe.StackItem.CFunction.toString = $estr;
 haxe.StackItem.CFunction.__enum__ = haxe.StackItem;
-haxe.StackItem.Module = function(m) { var $x = ["Module",1,m]; $x.__enum__ = haxe.StackItem; return $x; };
-haxe.StackItem.FilePos = function(s,file,line) { var $x = ["FilePos",2,s,file,line]; $x.__enum__ = haxe.StackItem; return $x; };
-haxe.StackItem.Method = function(classname,method) { var $x = ["Method",3,classname,method]; $x.__enum__ = haxe.StackItem; return $x; };
-haxe.StackItem.LocalFunction = function(v) { var $x = ["LocalFunction",4,v]; $x.__enum__ = haxe.StackItem; return $x; };
+haxe.StackItem.Module = function(m) { var $x = ["Module",1,m]; $x.__enum__ = haxe.StackItem; $x.toString = $estr; return $x; };
+haxe.StackItem.FilePos = function(s,file,line) { var $x = ["FilePos",2,s,file,line]; $x.__enum__ = haxe.StackItem; $x.toString = $estr; return $x; };
+haxe.StackItem.Method = function(classname,method) { var $x = ["Method",3,classname,method]; $x.__enum__ = haxe.StackItem; $x.toString = $estr; return $x; };
+haxe.StackItem.LocalFunction = function(v) { var $x = ["LocalFunction",4,v]; $x.__enum__ = haxe.StackItem; $x.toString = $estr; return $x; };
 haxe.CallStack = function() { };
 haxe.CallStack.__name__ = ["haxe","CallStack"];
 haxe.CallStack.exceptionStack = function() {
@@ -551,12 +553,15 @@ haxe.io.Eof.prototype = {
 };
 haxe.io.Error = { __ename__ : true, __constructs__ : ["Blocked","Overflow","OutsideBounds","Custom"] };
 haxe.io.Error.Blocked = ["Blocked",0];
+haxe.io.Error.Blocked.toString = $estr;
 haxe.io.Error.Blocked.__enum__ = haxe.io.Error;
 haxe.io.Error.Overflow = ["Overflow",1];
+haxe.io.Error.Overflow.toString = $estr;
 haxe.io.Error.Overflow.__enum__ = haxe.io.Error;
 haxe.io.Error.OutsideBounds = ["OutsideBounds",2];
+haxe.io.Error.OutsideBounds.toString = $estr;
 haxe.io.Error.OutsideBounds.__enum__ = haxe.io.Error;
-haxe.io.Error.Custom = function(e) { var $x = ["Custom",3,e]; $x.__enum__ = haxe.io.Error; return $x; };
+haxe.io.Error.Custom = function(e) { var $x = ["Custom",3,e]; $x.__enum__ = haxe.io.Error; $x.toString = $estr; return $x; };
 haxe.unit = {};
 haxe.unit.TestCase = function() {
 };
@@ -1461,13 +1466,14 @@ hxparse.LexEngine.prototype = {
 hxparse._LexEngine = {};
 hxparse._LexEngine.Pattern = { __ename__ : true, __constructs__ : ["Empty","Match","Star","Plus","Next","Choice","Group"] };
 hxparse._LexEngine.Pattern.Empty = ["Empty",0];
+hxparse._LexEngine.Pattern.Empty.toString = $estr;
 hxparse._LexEngine.Pattern.Empty.__enum__ = hxparse._LexEngine.Pattern;
-hxparse._LexEngine.Pattern.Match = function(c) { var $x = ["Match",1,c]; $x.__enum__ = hxparse._LexEngine.Pattern; return $x; };
-hxparse._LexEngine.Pattern.Star = function(p) { var $x = ["Star",2,p]; $x.__enum__ = hxparse._LexEngine.Pattern; return $x; };
-hxparse._LexEngine.Pattern.Plus = function(p) { var $x = ["Plus",3,p]; $x.__enum__ = hxparse._LexEngine.Pattern; return $x; };
-hxparse._LexEngine.Pattern.Next = function(p1,p2) { var $x = ["Next",4,p1,p2]; $x.__enum__ = hxparse._LexEngine.Pattern; return $x; };
-hxparse._LexEngine.Pattern.Choice = function(p1,p2) { var $x = ["Choice",5,p1,p2]; $x.__enum__ = hxparse._LexEngine.Pattern; return $x; };
-hxparse._LexEngine.Pattern.Group = function(p) { var $x = ["Group",6,p]; $x.__enum__ = hxparse._LexEngine.Pattern; return $x; };
+hxparse._LexEngine.Pattern.Match = function(c) { var $x = ["Match",1,c]; $x.__enum__ = hxparse._LexEngine.Pattern; $x.toString = $estr; return $x; };
+hxparse._LexEngine.Pattern.Star = function(p) { var $x = ["Star",2,p]; $x.__enum__ = hxparse._LexEngine.Pattern; $x.toString = $estr; return $x; };
+hxparse._LexEngine.Pattern.Plus = function(p) { var $x = ["Plus",3,p]; $x.__enum__ = hxparse._LexEngine.Pattern; $x.toString = $estr; return $x; };
+hxparse._LexEngine.Pattern.Next = function(p1,p2) { var $x = ["Next",4,p1,p2]; $x.__enum__ = hxparse._LexEngine.Pattern; $x.toString = $estr; return $x; };
+hxparse._LexEngine.Pattern.Choice = function(p1,p2) { var $x = ["Choice",5,p1,p2]; $x.__enum__ = hxparse._LexEngine.Pattern; $x.toString = $estr; return $x; };
+hxparse._LexEngine.Pattern.Group = function(p) { var $x = ["Group",6,p]; $x.__enum__ = hxparse._LexEngine.Pattern; $x.toString = $estr; return $x; };
 hxparse._LexEngine.Node = function(id,pid) {
 	this.id = id;
 	this.pid = pid;
@@ -1947,25 +1953,46 @@ js.Boot.__cast = function(o,t) {
 var qa = {};
 qa.ArithmeticBinop = { __ename__ : true, __constructs__ : ["OpAdd","OpSub","OpMul","OpDiv","OpPow"] };
 qa.ArithmeticBinop.OpAdd = ["OpAdd",0];
+qa.ArithmeticBinop.OpAdd.toString = $estr;
 qa.ArithmeticBinop.OpAdd.__enum__ = qa.ArithmeticBinop;
 qa.ArithmeticBinop.OpSub = ["OpSub",1];
+qa.ArithmeticBinop.OpSub.toString = $estr;
 qa.ArithmeticBinop.OpSub.__enum__ = qa.ArithmeticBinop;
 qa.ArithmeticBinop.OpMul = ["OpMul",2];
+qa.ArithmeticBinop.OpMul.toString = $estr;
 qa.ArithmeticBinop.OpMul.__enum__ = qa.ArithmeticBinop;
 qa.ArithmeticBinop.OpDiv = ["OpDiv",3];
+qa.ArithmeticBinop.OpDiv.toString = $estr;
 qa.ArithmeticBinop.OpDiv.__enum__ = qa.ArithmeticBinop;
 qa.ArithmeticBinop.OpPow = ["OpPow",4];
+qa.ArithmeticBinop.OpPow.toString = $estr;
 qa.ArithmeticBinop.OpPow.__enum__ = qa.ArithmeticBinop;
 qa.NumberFormat = { __ename__ : true, __constructs__ : ["None","Decimal","Hexadecimal"] };
 qa.NumberFormat.None = ["None",0];
+qa.NumberFormat.None.toString = $estr;
 qa.NumberFormat.None.__enum__ = qa.NumberFormat;
 qa.NumberFormat.Decimal = ["Decimal",1];
+qa.NumberFormat.Decimal.toString = $estr;
 qa.NumberFormat.Decimal.__enum__ = qa.NumberFormat;
 qa.NumberFormat.Hexadecimal = ["Hexadecimal",2];
+qa.NumberFormat.Hexadecimal.toString = $estr;
 qa.NumberFormat.Hexadecimal.__enum__ = qa.NumberFormat;
 qa.Constant = { __ename__ : true, __constructs__ : ["CInteger","CRatio"] };
-qa.Constant.CInteger = function(n,format) { var $x = ["CInteger",0,n,format]; $x.__enum__ = qa.Constant; return $x; };
-qa.Constant.CRatio = function(n) { var $x = ["CRatio",1,n]; $x.__enum__ = qa.Constant; return $x; };
+qa.Constant.CInteger = function(n,format) { var $x = ["CInteger",0,n,format]; $x.__enum__ = qa.Constant; $x.toString = $estr; return $x; };
+qa.Constant.CRatio = function(n) { var $x = ["CRatio",1,n]; $x.__enum__ = qa.Constant; $x.toString = $estr; return $x; };
+qa.ArithmeticError = function(type) {
+	this.type = type;
+};
+qa.ArithmeticError.__name__ = ["qa","ArithmeticError"];
+qa.ArithmeticError.prototype = {
+	type: null
+	,__class__: qa.ArithmeticError
+};
+qa.MathError = { __ename__ : true, __constructs__ : ["DivisionByZero","UnsupportedOperation"] };
+qa.MathError.DivisionByZero = ["DivisionByZero",0];
+qa.MathError.DivisionByZero.toString = $estr;
+qa.MathError.DivisionByZero.__enum__ = qa.MathError;
+qa.MathError.UnsupportedOperation = function(msg) { var $x = ["UnsupportedOperation",1,msg]; $x.__enum__ = qa.MathError; $x.toString = $estr; return $x; };
 qa._Arithmetic = {};
 qa._Arithmetic.SimpleFraction_Impl_ = function() { };
 qa._Arithmetic.SimpleFraction_Impl_.__name__ = ["qa","_Arithmetic","SimpleFraction_Impl_"];
@@ -1994,29 +2021,77 @@ qa._Arithmetic.SimpleFraction_Impl_.gcd = function(this1) {
 	}
 	return d;
 };
+qa._Arithmetic.SimpleFraction_Impl_.post = function(this1) {
+	qa._Arithmetic.SimpleFraction_Impl_.simplify(this1);
+};
+qa._Arithmetic.SimpleFraction_Impl_.simplify = function(this1) {
+	qa._Arithmetic.SimpleFraction_Impl_.reduce(this1);
+	var v = this1;
+	if(qa._Arithmetic.Integer_Impl_.lessThan(v.a,0) && qa._Arithmetic.Integer_Impl_.lessThan(v.b,0)) {
+		v.a = -v.a;
+		v.b = -v.b;
+	}
+};
 qa._Arithmetic.SimpleFraction_Impl_.reduce = function(this1) {
 	var d = qa._Arithmetic.SimpleFraction_Impl_.gcd(this1);
 	var v = this1;
 	v.a = Math.floor(v.a / d);
 	v.b = Math.floor(v.b / d);
-	haxe.Log.trace(v,{ fileName : "Arithmetic.hx", lineNumber : 62, className : "qa._Arithmetic.SimpleFraction_Impl_", methodName : "reduce"});
+};
+qa._Arithmetic.SimpleFraction_Impl_.pow = function(a,b) {
+	var va = a;
+	var vb = b;
+	if(vb.b != 1) throw new qa.ArithmeticError(qa.MathError.UnsupportedOperation("Fractional powers not supported"));
+	var r = { a : Math.floor(Math.pow(va.a,vb.a)), b : Math.floor(Math.pow(va.b,vb.a))};
+	qa._Arithmetic.SimpleFraction_Impl_.post(r);
+	return r;
+};
+qa._Arithmetic.SimpleFraction_Impl_.negate = function(n) {
+	return qa._Arithmetic.SimpleFraction_Impl_.subtract(qa._Arithmetic.SimpleFraction_Impl_.ZERO,n);
 };
 qa._Arithmetic.SimpleFraction_Impl_.add = function(a,b) {
 	var va = a;
 	var vb = b;
 	var r = { a : qa._Arithmetic.Integer_Impl_.add(qa._Arithmetic.Integer_Impl_.multiply(va.a,vb.b),qa._Arithmetic.Integer_Impl_.multiply(vb.a,va.b)), b : qa._Arithmetic.Integer_Impl_.multiply(va.b,vb.b)};
-	qa._Arithmetic.SimpleFraction_Impl_.reduce(r);
+	qa._Arithmetic.SimpleFraction_Impl_.post(r);
 	return r;
 };
 qa._Arithmetic.SimpleFraction_Impl_.subtract = function(a,b) {
 	var va = a;
 	var vb = b;
 	var r = { a : qa._Arithmetic.Integer_Impl_.subtract(qa._Arithmetic.Integer_Impl_.multiply(va.a,vb.b),qa._Arithmetic.Integer_Impl_.multiply(vb.a,va.b)), b : qa._Arithmetic.Integer_Impl_.multiply(va.b,vb.b)};
-	qa._Arithmetic.SimpleFraction_Impl_.reduce(r);
+	qa._Arithmetic.SimpleFraction_Impl_.post(r);
+	return r;
+};
+qa._Arithmetic.SimpleFraction_Impl_.multiply = function(a,b) {
+	var va = a;
+	var vb = b;
+	var r = { a : qa._Arithmetic.Integer_Impl_.multiply(va.a,vb.a), b : qa._Arithmetic.Integer_Impl_.multiply(va.b,vb.b)};
+	qa._Arithmetic.SimpleFraction_Impl_.post(r);
+	return r;
+};
+qa._Arithmetic.SimpleFraction_Impl_.divide = function(a,b) {
+	var va = a;
+	var vb = b;
+	if(vb.a == 0) throw new qa.ArithmeticError(qa.MathError.DivisionByZero);
+	var r = { a : qa._Arithmetic.Integer_Impl_.multiply(va.a,vb.b), b : qa._Arithmetic.Integer_Impl_.multiply(va.b,vb.a)};
+	qa._Arithmetic.SimpleFraction_Impl_.post(r);
 	return r;
 };
 qa._Arithmetic.Integer_Impl_ = function() { };
 qa._Arithmetic.Integer_Impl_.__name__ = ["qa","_Arithmetic","Integer_Impl_"];
+qa._Arithmetic.Integer_Impl_.negate = function(n) {
+	return -n;
+};
+qa._Arithmetic.Integer_Impl_.abs = function(n) {
+	if(qa._Arithmetic.Integer_Impl_.lessThan(n,0)) return -n; else return n;
+};
+qa._Arithmetic.Integer_Impl_.divideInteger = function(a,b) {
+	return Math.floor(a / b);
+};
+qa._Arithmetic.Integer_Impl_.pow = function(a,b) {
+	return Math.floor(Math.pow(a,b));
+};
 qa._Arithmetic.Integer_Impl_.fromString = function(s) {
 	var n = Std.parseInt(s);
 	if(n == null) throw "Unable to convert from String to Integer: " + s;
@@ -2047,29 +2122,23 @@ qa._Arithmetic.Integer_Impl_.greaterThan = function(a,b) {
 qa._Arithmetic.Integer_Impl_.lessThan = function(a,b) {
 	return a < b;
 };
-qa._Arithmetic.Integer_Impl_.negate = function(n) {
-	return -n;
-};
-qa._Arithmetic.Integer_Impl_.abs = function(n) {
-	if(qa._Arithmetic.Integer_Impl_.lessThan(n,0)) return -n; else return n;
-};
-qa._Arithmetic.Integer_Impl_.divideInteger = function(a,b) {
-	return Math.floor(a / b);
-};
 qa.ArithmeticToken = { __ename__ : true, __constructs__ : ["TConst","TPOpen","TPClose","TBinop","TEof"] };
-qa.ArithmeticToken.TConst = function(c) { var $x = ["TConst",0,c]; $x.__enum__ = qa.ArithmeticToken; return $x; };
+qa.ArithmeticToken.TConst = function(c) { var $x = ["TConst",0,c]; $x.__enum__ = qa.ArithmeticToken; $x.toString = $estr; return $x; };
 qa.ArithmeticToken.TPOpen = ["TPOpen",1];
+qa.ArithmeticToken.TPOpen.toString = $estr;
 qa.ArithmeticToken.TPOpen.__enum__ = qa.ArithmeticToken;
 qa.ArithmeticToken.TPClose = ["TPClose",2];
+qa.ArithmeticToken.TPClose.toString = $estr;
 qa.ArithmeticToken.TPClose.__enum__ = qa.ArithmeticToken;
-qa.ArithmeticToken.TBinop = function(op) { var $x = ["TBinop",3,op]; $x.__enum__ = qa.ArithmeticToken; return $x; };
+qa.ArithmeticToken.TBinop = function(op) { var $x = ["TBinop",3,op]; $x.__enum__ = qa.ArithmeticToken; $x.toString = $estr; return $x; };
 qa.ArithmeticToken.TEof = ["TEof",4];
+qa.ArithmeticToken.TEof.toString = $estr;
 qa.ArithmeticToken.TEof.__enum__ = qa.ArithmeticToken;
 qa.ArithmeticExpr = { __ename__ : true, __constructs__ : ["EConst","EBinop","EParenthesis","ENeg"] };
-qa.ArithmeticExpr.EConst = function(c) { var $x = ["EConst",0,c]; $x.__enum__ = qa.ArithmeticExpr; return $x; };
-qa.ArithmeticExpr.EBinop = function(op,e1,e2) { var $x = ["EBinop",1,op,e1,e2]; $x.__enum__ = qa.ArithmeticExpr; return $x; };
-qa.ArithmeticExpr.EParenthesis = function(e) { var $x = ["EParenthesis",2,e]; $x.__enum__ = qa.ArithmeticExpr; return $x; };
-qa.ArithmeticExpr.ENeg = function(e) { var $x = ["ENeg",3,e]; $x.__enum__ = qa.ArithmeticExpr; return $x; };
+qa.ArithmeticExpr.EConst = function(c) { var $x = ["EConst",0,c]; $x.__enum__ = qa.ArithmeticExpr; $x.toString = $estr; return $x; };
+qa.ArithmeticExpr.EBinop = function(op,e1,e2) { var $x = ["EBinop",1,op,e1,e2]; $x.__enum__ = qa.ArithmeticExpr; $x.toString = $estr; return $x; };
+qa.ArithmeticExpr.EParenthesis = function(e) { var $x = ["EParenthesis",2,e]; $x.__enum__ = qa.ArithmeticExpr; $x.toString = $estr; return $x; };
+qa.ArithmeticExpr.ENeg = function(e) { var $x = ["ENeg",3,e]; $x.__enum__ = qa.ArithmeticExpr; $x.toString = $estr; return $x; };
 qa.ArithmeticPrinter = function() { };
 qa.ArithmeticPrinter.__name__ = ["qa","ArithmeticPrinter"];
 qa.ArithmeticPrinter.printTex = function(expr) {
@@ -2087,7 +2156,7 @@ qa.ArithmeticPrinter.printTexMath = function(expr) {
 			case 1:case 0:
 				return qa._Arithmetic.Integer_Impl_.toString(qa._Arithmetic.Integer_Impl_.add("",n));
 			case 2:
-				return "\\mathtt{0x" + StringTools.hex(n,0) + "}";
+				return "\\mathtt{" + StringTools.hex(n,0) + "}_{16}";
 			}
 			break;
 		case 1:
@@ -2109,7 +2178,7 @@ qa.ArithmeticPrinter.printTexMath = function(expr) {
 		case 2:
 			return "" + p1 + " \\times " + p2;
 		case 4:
-			return "" + p1 + "^" + p2;
+			return "" + p1 + "^{" + p2 + "}";
 		case 3:
 			p1 = qa.ArithmeticPrinter.printTexMath(qa.ArithmeticPrinter.escapeParens(e1));
 			p2 = qa.ArithmeticPrinter.printTexMath(qa.ArithmeticPrinter.escapeParens(e2));
@@ -2118,7 +2187,7 @@ qa.ArithmeticPrinter.printTexMath = function(expr) {
 		break;
 	case 2:
 		var e = expr[2];
-		return "(" + qa.ArithmeticPrinter.printTexMath(e) + ")";
+		return "\\left(" + qa.ArithmeticPrinter.printTexMath(e) + "\\right)";
 	case 3:
 		var e3 = expr[2];
 		return "-" + qa.ArithmeticPrinter.printTexMath(e3);
@@ -2171,8 +2240,29 @@ qa.ArithmeticParser.prototype = $extend(hxparse.Parser_qa_ArithmeticLexer_qa_Ari
 		return t;
 	}
 	,parse: function() {
-		this.step("parse");
 		var e;
+		{
+			var _g = this.peek(0);
+			switch(_g[1]) {
+			case 3:
+				switch(_g[2][1]) {
+				case 1:
+					this.last = this.token.elt;
+					this.token = this.token.next;
+					var e1 = this.parseElement();
+					e = this.parseNext(qa.ArithmeticExpr.ENeg(e1));
+					break;
+				default:
+					e = this.parseNext(this.parseElement());
+				}
+				break;
+			default:
+				e = this.parseNext(this.parseElement());
+			}
+		}
+		return e;
+	}
+	,parseElement: function() {
 		{
 			var _g = this.peek(0);
 			switch(_g[1]) {
@@ -2181,46 +2271,28 @@ qa.ArithmeticParser.prototype = $extend(hxparse.Parser_qa_ArithmeticLexer_qa_Ari
 				this.last = this.token.elt;
 				this.token = this.token.next;
 				this.step("const " + Std.string(c));
-				e = this.parseNext(qa.ArithmeticExpr.EConst(c));
-				break;
+				return qa.ArithmeticExpr.EConst(c);
 			case 1:
 				this.last = this.token.elt;
 				this.token = this.token.next;
-				var e1 = this.parse();
+				var e = this.parse();
 				var _g1 = this.peek(0);
 				switch(_g1[1]) {
 				case 2:
 					this.last = this.token.elt;
 					this.token = this.token.next;
-					this.step("paren " + Std.string(e1));
-					e = this.parseNext(qa.ArithmeticExpr.EParenthesis(e1));
-					break;
+					this.step("paren " + Std.string(e));
+					return qa.ArithmeticExpr.EParenthesis(e);
 				default:
 					throw new hxparse.Unexpected(this.peek(0),this.stream.curPos());
-				}
-				break;
-			case 3:
-				switch(_g[2][1]) {
-				case 1:
-					this.last = this.token.elt;
-					this.token = this.token.next;
-					var e2 = this.parse();
-					this.step("neg " + Std.string(e2));
-					e = this.parseNext(qa.ArithmeticExpr.ENeg(e2));
-					break;
-				default:
-					throw new hxparse.NoMatch(this.stream.curPos(),this.peek(0));
 				}
 				break;
 			default:
 				throw new hxparse.NoMatch(this.stream.curPos(),this.peek(0));
 			}
 		}
-		this.step("postparse " + Std.string(this.peek(0)));
-		return e;
 	}
 	,parseNext: function(e1) {
-		this.step("parseNext");
 		{
 			var _g = this.peek(0);
 			switch(_g[1]) {
@@ -2229,7 +2301,7 @@ qa.ArithmeticParser.prototype = $extend(hxparse.Parser_qa_ArithmeticLexer_qa_Ari
 				this.last = this.token.elt;
 				this.token = this.token.next;
 				var e2 = this.parse();
-				this.step("binop " + Std.string(e1) + " " + Std.string(op) + " " + Std.string(e2));
+				this.step("binop " + Std.string(op) + " " + Std.string(e1) + " " + Std.string(e2));
 				return this.binop(e1,op,e2);
 			default:
 				this.step("pass " + Std.string(e1));
@@ -2384,7 +2456,7 @@ qa.ArithmeticEvaluator["eval"] = function(e) {
 							case 3:
 								return qa.Constant.CRatio(qa._Arithmetic.Integer_Impl_.divide(a1,b1));
 							case 4:
-								return qa.Constant.CInteger(1337,qa.NumberFormat.None);
+								return qa.Constant.CInteger(Math.floor(Math.pow(a1,b1)),qa.NumberFormat.None);
 							}
 							break;
 						case 1:
@@ -2429,8 +2501,21 @@ qa.ArithmeticEvaluator["eval"] = function(e) {
 								return qa.Constant.CRatio(qa._Arithmetic.SimpleFraction_Impl_.add(a3,b2));
 							case 1:
 								return qa.Constant.CRatio(qa._Arithmetic.SimpleFraction_Impl_.subtract(a3,b2));
-							default:
-								throw "Unimplemented binop " + Std.string(op) + " " + Std.string(a3) + " " + Std.string(b2);
+							case 2:
+								return qa.Constant.CRatio(qa._Arithmetic.SimpleFraction_Impl_.multiply(a3,b2));
+							case 3:
+								return qa.Constant.CRatio(qa._Arithmetic.SimpleFraction_Impl_.divide(a3,b2));
+							case 4:
+								return qa.Constant.CRatio((function($this) {
+									var $r;
+									var va = a3;
+									var vb = b2;
+									if(vb.b != 1) throw new qa.ArithmeticError(qa.MathError.UnsupportedOperation("Fractional powers not supported"));
+									var r = { a : Math.floor(Math.pow(va.a,vb.a)), b : Math.floor(Math.pow(va.b,vb.a))};
+									qa._Arithmetic.SimpleFraction_Impl_.post(r);
+									$r = r;
+									return $r;
+								}(this)));
 							}
 							break;
 						case 0:
@@ -2503,19 +2588,9 @@ qa.ArithmeticEvaluator["eval"] = function(e) {
 				var format1 = e3[2][3];
 				var n = e3[2][2];
 				return qa.Constant.CInteger(-n,format1);
-			default:
-				if((function($this) {
-					var $r;
-					switch(e3[1]) {
-					case 0:
-						$r = true;
-						break;
-					default:
-						$r = false;
-					}
-					return $r;
-				}(this))) throw "Unimplemented negation " + Std.string(e3);
-				return qa.ArithmeticEvaluator["eval"](qa.ArithmeticExpr.ENeg(qa.ArithmeticExpr.EConst(qa.ArithmeticEvaluator["eval"](e3))));
+			case 1:
+				var n1 = e3[2][2];
+				return qa.Constant.CRatio(qa._Arithmetic.SimpleFraction_Impl_.subtract(qa._Arithmetic.SimpleFraction_Impl_.ZERO,n1));
 			}
 			break;
 		default:
@@ -2647,6 +2722,8 @@ hxmath._BigInt.BigInt_Impl_.MUL_MASK = 32767;
 hxparse.LexEngine.MAX_CODE = 255;
 hxparse.LexEngine.EMPTY = [];
 hxparse.LexEngine.ALL_CHARS = [{ min : 0, max : 255}];
+qa._Arithmetic.SimpleFraction_Impl_.ZERO = { a : 0, b : 0};
+qa._Arithmetic.Integer_Impl_.ZERO = 0;
 qa.ArithmeticLexer.tok = hxparse.Lexer.buildRuleset([{ rule : "0x[0-9a-fA-F]+", func : function(lexer) {
 	return qa.ArithmeticToken.TConst(qa.Constant.CInteger(qa._Arithmetic.Integer_Impl_.fromString(lexer.current),qa.NumberFormat.Hexadecimal));
 }},{ rule : "[0-9]+", func : function(lexer1) {
