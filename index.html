@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="stylesheets/pygment_trac.css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
     <script src="javascripts/respond.js"></script>
+    <script src="javascripts/iframeResizer.min.js"></script>
     <!--[if lt IE 9]>
       <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
     <![endif]-->
@@ -39,8 +40,20 @@
         </div>
 
         <p>I want something like Wolfram Alpha, but in Haxe - come join me on this magical journey! </p>
-
-<p>Work very much in progress.</p>
+		<p>Work very much in progress.</p>
+		<p>Try it out!</p>
+		
+		<h2><a href="bin/index.html">Standalone</a></h2>
+		
+		<h2>Embedded</h2>
+		
+		<iframe id="embedded" src="bin/index.html" scrolling="no" frameborder="0">
+		  <p>Your browser does not support iframes.</p>
+		</iframe>
+		<script>jQuery('iframe').iFrameResize({
+			//sizeWidth: true
+		});</script>
+		
       </section>
 
     </div>

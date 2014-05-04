@@ -1,3 +1,11 @@
+#embedded {
+	width: 100%;
+	background-color: #FFF;
+}
+
+
+
+
 @font-face {
   font-family: 'OpenSansLight';
   src: url("../fonts/OpenSans-Light-webfont.eot");
