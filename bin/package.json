@@ -1,0 +1,8 @@
+{
+  "name": "know",
+  "main": "index.html",
+  "window": {
+    "width": 840,
+    "height": 514
+  }
+}
