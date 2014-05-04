@@ -1,6 +1,7 @@
 package qa;
 import byte.ByteData;
 import hxmath.BigInt;
+import qa.Arithmetic.ArithmeticError;
 import qa.Arithmetic.SimpleFraction;
 
 enum ArithmeticBinop {
@@ -28,7 +29,20 @@ typedef RatioValue = {
 	b:Integer,
 }
 
+class ArithmeticError {
+	public var type:MathError;
+	public function new(type) { this.type = type; }
+}
+
+enum MathError {
+	DivisionByZero;
+	UnsupportedOperation(msg:String);
+}
+
 abstract SimpleFraction(RatioValue) from RatioValue to RatioValue {
+	
+	public static var ZERO:SimpleFraction = ({ a: 0, b: 0 }:RatioValue);
+	
 	public function getNumerator() {
 		return this.a;
 	}
@@ -54,39 +68,109 @@ abstract SimpleFraction(RatioValue) from RatioValue to RatioValue {
 		return d;
 	}
 	
+	public function post() {
+		simplify();
+	}
+	
+	public function simplify() {
+		reduce();
+		var v = this;
+		if (v.a < 0 && v.b < 0) {
+			v.a = v.a.negate();
+			v.b = v.b.negate();
+		}
+	}
+	
 	public function reduce() {
 		var d = gcd();
 		var v = this;
 		v.a = v.a.divideInteger(d);
 		v.b = v.b.divideInteger(d);
-		trace(v);
 	}
 	
-	@:op(A + B)	static public function add(a:SimpleFraction, b:SimpleFraction):SimpleFraction {
+	
+	static inline public function pow(a:SimpleFraction, b:SimpleFraction):SimpleFraction {
+		var va:RatioValue = a;
+		var vb:RatioValue = b;
+		if (vb.b != 1) throw new ArithmeticError(UnsupportedOperation("Fractional powers not supported"));
+		var r = ({
+			a: va.a.pow(vb.a),
+			b: va.b.pow(vb.a)
+		}:SimpleFraction);
+		r.post();
+		return r;
+	}
+	
+	static inline public function negate(n:SimpleFraction):SimpleFraction {
+		return ZERO-n;
+	}
+	
+	@:op(A + B) static public function add(a:SimpleFraction, b:SimpleFraction):SimpleFraction {
 		var va:RatioValue = a;
 		var vb:RatioValue = b;
 		var r = ({
 			a: va.a*vb.b + vb.a*va.b,
 			b: va.b*vb.b
 		}:SimpleFraction);
-		r.reduce();
+		r.post();
 		return r;
 	}
 	
-	@:op(A - B)	static public function subtract(a:SimpleFraction, b:SimpleFraction):SimpleFraction {
+	@:op(A - B) static public function subtract(a:SimpleFraction, b:SimpleFraction):SimpleFraction {
 		var va:RatioValue = a;
 		var vb:RatioValue = b;
 		var r = ({
 			a: va.a*vb.b - vb.a*va.b,
 			b: va.b*vb.b
 		}:SimpleFraction);
-		r.reduce();
+		r.post();
+		return r;
+	}
+	
+	@:op(A * B) static public function multiply(a:SimpleFraction, b:SimpleFraction):SimpleFraction {
+		var va:RatioValue = a;
+		var vb:RatioValue = b;
+		var r = ({
+			a: va.a*vb.a,
+			b: va.b*vb.b
+		}:SimpleFraction);
+		r.post();
+		return r;
+	}
+	
+	@:op(A / B) static public function divide(a:SimpleFraction, b:SimpleFraction):SimpleFraction {
+		var va:RatioValue = a;
+		var vb:RatioValue = b;
+		if (vb.a == (0:Integer)) throw new ArithmeticError(DivisionByZero);
+		var r = ({
+			a: va.a*vb.b,
+			b: va.b*vb.a
+		}:SimpleFraction);
+		r.post();
 		return r;
 	}
 }
 
 ///*
 abstract Integer(Int) from Int to Int {
+	
+	public static inline var ZERO:Integer = (0:Integer);
+	
+	static inline public function negate(n:Integer):Integer {
+		return -(n:Int);
+	}
+	
+	static inline public function abs(n:Integer):Integer {
+		return n < (0:Integer) ? n.negate() : n;
+	}
+	
+	static inline public function divideInteger(a:Integer, b:Integer):Integer {
+		return Math.floor((a:Int)/(b:Int));
+	}
+	
+	static inline public function pow(a:Integer, b:Integer):Integer {
+		return Math.floor(Math.pow((a:Int), (b:Int)));
+	}
 	
 	@:from static public function fromString(s:String):Integer {
 		var n:Null<Int> = Std.parseInt(s);
@@ -107,7 +191,7 @@ abstract Integer(Int) from Int to Int {
 		}:SimpleFraction);
 	}
 	
-	@:op(A + B)	static public function add(a:Integer, b:Integer):Integer {
+	@:op(A + B) static public function add(a:Integer, b:Integer):Integer {
 		return a+b;
 	}
 	@:op(A - B) static public function subtract(a:Integer, b:Integer):Integer {
@@ -125,18 +209,6 @@ abstract Integer(Int) from Int to Int {
 	}
 	@:op(A < B) static public function lessThan(a:Integer, b:Integer):Bool {
 		return a < b;
-	}
-	
-	static inline public function negate(n:Integer):Integer {
-		return -(n:Int);
-	}
-	
-	static inline public function abs(n:Integer):Integer {
-		return n < (0:Integer) ? n.negate() : n;
-	}
-	
-	static inline public function divideInteger(a:Integer, b:Integer):Integer {
-		return Math.floor((a:Int)/(b:Int));
 	}
 	
 	/*
@@ -197,7 +269,8 @@ class ArithmeticPrinter {
 					case CInteger(n, format):
 						switch (format) {
 							case Decimal, None: ""+n;
-							case Hexadecimal: "\\mathtt{0x"+StringTools.hex(n, 0)+"}";
+							//case Hexadecimal: "\\mathtt{0x"+StringTools.hex(n, 0)+"}";
+							case Hexadecimal: "\\mathtt{"+StringTools.hex(n, 0)+"}_{16}";
 						}
 					case CRatio(n):
 						//"\\frac{" + n.getNumerator() + "}{" + n.getDenominator() + "}";
@@ -213,14 +286,14 @@ class ArithmeticPrinter {
 					case OpAdd: '$p1 + $p2';
 					case OpSub: '$p1 - $p2';
 					case OpMul: '$p1 \\times $p2';
-					case OpPow: '${p1}^${p2}';
+					case OpPow: '$p1^{$p2}';
 					case OpDiv:
 						p1 = printTexMath(escapeParens(e1));
 						p2 = printTexMath(escapeParens(e2));
 						'\\frac{$p1}{$p2}';
 				}
 			case EParenthesis(e):
-				"(" + printTexMath(e) + ")";
+				"\\left(" + printTexMath(e) + "\\right)";
 			case ENeg(e):
 				"-" + printTexMath(e);
 		};
@@ -297,34 +370,44 @@ class ArithmeticParser extends hxparse.Parser<ArithmeticLexer, ArithmeticToken> 
 		steps.push(msg);
 	}
 	
+	///*
 	override function peek(n:Int) {
 		var t = super.peek(n);
 		step('peek($n): ' + t);
 		return t;
 	}
+	//*/
 	
 	public function parse():ArithmeticExpr {
-		step("parse");
+		//step("parse");
 		var e = switch stream {
+			case [TBinop(OpSub), e = parseElement()]:
+				parseNext(ENeg(e));
+			case _:
+				parseNext(parseElement());
+			//case [TBinop(OpSub)]:
+				//parseNext(ENeg(parse()));
+		}
+		//step("postparse "+peek(0));
+		return e;
+	}
+	
+	public function parseElement():ArithmeticExpr {
+		return switch stream {
 			case [TConst(c)]:
 				step('const $c');
-				parseNext(EConst(c));
+				EConst(c);
 			case [TPOpen, e = parse(), TPClose]:
 				step('paren $e');
-				parseNext(EParenthesis(e));
-			case [TBinop(OpSub), e = parse()]:
-				step('neg $e');
-				parseNext(ENeg(e));
+				EParenthesis(e);
 		}
-		step("postparse "+peek(0));
-		return e;
 	}
 
 	function parseNext(e1:ArithmeticExpr):ArithmeticExpr {
-		step("parseNext");
+		//step("parseNext");
 		return switch stream {
 			case [TBinop(op), e2 = parse()]:
-				step('binop $e1 $op $e2');
+				step('binop $op $e1 $e2');
 				binop(e1, op, e2);
 			case _:
 				step('pass $e1');
@@ -368,7 +451,7 @@ class ArithmeticEvaluator {
 							case OpSub: CInteger(a-b, format);
 							case OpMul: CInteger(a*b, format);
 							case OpDiv: CRatio(a/b);
-							case OpPow: CInteger(1337, None);
+							case OpPow: CInteger(a.pow(b), None);
 						};
 						
 					// Ratio
@@ -376,7 +459,9 @@ class ArithmeticEvaluator {
 						switch(op) {
 							case OpAdd: CRatio(a+b);
 							case OpSub: CRatio(a-b);
-							//case OpMul: CRatio(a*b, format);
+							case OpMul: CRatio(a*b);
+							case OpDiv: CRatio(a/b);
+							case OpPow: CRatio(a.pow(b));
 							case _: throw 'Unimplemented binop $op $a $b';
 						};
 						
@@ -397,6 +482,8 @@ class ArithmeticEvaluator {
 				switch (e) {
 					case EConst(CInteger(n, format)):
 						CInteger(n.negate(), format);
+					case EConst(CRatio(n)):
+						CRatio(n.negate());
 					case _:
 						if (e.match(EConst(_))) throw 'Unimplemented negation $e';
 						eval(ENeg(EConst(eval(e))));

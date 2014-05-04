@@ -50,7 +50,12 @@ class Know {
 		//input.val("0xFF");
 		//input.val("1/2");
 		//input.val("1+1/2");
-		input.val("1/2-1/2");
+		//input.val("1/2-1/2");
+		//input.val("(3/4)/(5/6)");
+		//input.val("-1/2");
+		//input.val("-1+1");
+		//input.val("(2/3)^4");
+		input.val("0xA+1+(2/3)^4/5");
 		inputChange();
 		
 		var runner = new TestRunner();
