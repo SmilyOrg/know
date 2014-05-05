@@ -38,6 +38,7 @@ class ArithmeticError {
 enum MathError {
 	DivisionByZero;
 	UnsupportedOperation(msg:String);
+	Overflow;
 }
 
 abstract Real(Float) from Float to Float {
@@ -246,7 +247,9 @@ abstract Integer(Int) from Int to Int {
 	}
 	
 	static inline public function pow(a:Integer, b:Integer):Integer {
-		return Math.floor(Math.pow((a:Int), (b:Int)));
+		var f = Math.pow((a:Int), (b:Int));
+		if (!Math.isFinite(f)) throw new ArithmeticError(Overflow);
+		return Math.floor(f);
 	}
 	
 	@:to static public function toReal(n:Integer):Real {
@@ -293,11 +296,39 @@ enum ArithmeticExpr {
 }
 
 class ArithmeticPrinter {
-	static public function printEvalStep(step:EvalStep) {
-		return switch (step) {
-			case Promote(c, p): 'Promoted ${printConstant(c)} to ${printConstant(p)}';
-		}
+	
+	static private function getTag(s:String):String {
+		return '<span class="tag tag-$s">$s</span>';
 	}
+	
+	static private function getExpressionTag(e:ArithmeticExpr) {
+		return getTag(switch (e) {
+			case EConst(_):       "const";
+			case EBinop(_):       "binop";
+			case EParenthesis(_): "paren";
+			case ENeg(_):         "neg";
+		});
+	}
+	
+	static public function printEvalStep(step:EvalStep) {
+		var type = switch (step.type) {
+			case Promote(c, p): getTag("promoted") + '${printConstant(c)} to ${printConstant(p)}';
+			case Expression(e):
+				//"Eval " +
+				var expr = switch (e) {
+					//case EConst(c): 'constant ${printConstant(c)}';
+					case EConst(c): printConstant(c);
+					case EBinop(c, e1, e2): printTexInline(e);
+					case EParenthesis(e): "";
+					case ENeg(e): printTexInline(e);
+				}
+				getExpressionTag(e) + expr;
+			case Result(c):
+				getTag("result") + " \\(\\rightarrow\\) " + printConstant(c);
+		};
+		return '<div class="step" style="margin-left: ${step.level}em;">' + type + '</div>';
+	}
+	
 	static public function printConstant(c:Constant):String {
 		var type = switch (c) {
 			case CInteger(_, _): "integer";
@@ -311,6 +342,9 @@ class ArithmeticPrinter {
 	static public function printTex(expr:ArithmeticExpr):String {
 		return "$$"+printTexMath(expr)+"$$";
 	}
+	static public function printTexInline(expr:ArithmeticExpr):String {
+		return "\\("+printTexMath(expr)+"\\)";
+	}
 	static public function printTexMath(expr:ArithmeticExpr):String {
 		return switch (expr) {
 			case EConst(c):
@@ -323,7 +357,7 @@ class ArithmeticPrinter {
 						}
 					case CRational(n):
 						//"\\frac{" + n.getNumerator() + "}{" + n.getDenominator() + "}";
-						"\\frac{" + n.getNumerator().toString() + "}{" + n.getDenominator().toString() + "}";
+						"\\left(\\frac{" + n.getNumerator().toString() + "}{" + n.getDenominator().toString() + "}\\right)";
 					case CReal(n):
 						"" + n.toString();
 				};
@@ -478,8 +512,24 @@ class ArithmeticParser extends hxparse.Parser<ArithmeticLexer, ArithmeticToken> 
 	}
 }
 
-enum EvalStep {
+enum EvalStepType {
+	Expression(e:ArithmeticExpr);
+	Result(c:Constant);
 	Promote(c:Constant, p:Constant);
+}
+
+typedef EvalStep = {
+	type:EvalStepType,
+	level:Int
+}
+
+class EvalState {
+	public var currentLevel:Int;
+	public var steps = new List<EvalStep>();
+	public function new() {}
+	public function addStep(type:EvalStepType) {
+		steps.add({ type: type, level: currentLevel });
+	}
 }
 
 class ArithmeticEvaluator {
@@ -492,14 +542,14 @@ class ArithmeticEvaluator {
 		}
 	}
 	
-	static function changeRank(c:Constant, base:Constant, steps:List<EvalStep>) {
+	static function changeRank(c:Constant, base:Constant, state:EvalState) {
 		var rb = getConstantRank(base);
 		
 		var rc = getConstantRank(c);
 		while (rc != rb) {
 			if (rc < rb) {
 				var p = promoteConst(c);
-				steps.add(Promote(c, p));
+				state.addStep(Promote(c, p));
 				c = p;
 			} else {
 				throw 'Constant demotion not supported';
@@ -521,8 +571,14 @@ class ArithmeticEvaluator {
 		}
 	}
 	
-	static public function eval(e:ArithmeticExpr, steps:List<EvalStep>):Constant {
-		return switch(e) {
+	static public function eval(e:ArithmeticExpr, state:EvalState):Constant {
+		state.currentLevel++;
+		switch (e) {
+			case EConst(_), EParenthesis(_):
+			case _: state.addStep(Expression(e));
+		}
+		//state.addStep(Expression(e));
+		var result = switch(e) {
 			case EConst(c):
 				c; 
 			case EBinop(op, e1, e2):
@@ -576,16 +632,16 @@ class ArithmeticEvaluator {
 						
 						// Promotion
 						eval(if (rb > ra) {
-							EBinop(op, EConst(changeRank(a, b, steps)), e2);
+							EBinop(op, EConst(changeRank(a, b, state)), e2);
 						} else {
-							EBinop(op, e1, EConst(changeRank(b, a, steps)));
-						}, steps);
+							EBinop(op, e1, EConst(changeRank(b, a, state)));
+						}, state);
 					case _:
-						eval(EBinop(op, EConst(eval(e1, steps)), EConst(eval(e2, steps))), steps);
+						eval(EBinop(op, EConst(eval(e1, state)), EConst(eval(e2, state))), state);
 						
 				}
 			case EParenthesis(e1):
-				eval(e1, steps);
+				eval(e1, state);
 			case ENeg(e):
 				switch (e) {
 					case EConst(CInteger(n, format)):
@@ -594,8 +650,14 @@ class ArithmeticEvaluator {
 						CRational(n.negate());
 					case _:
 						if (e.match(EConst(_))) throw 'Unimplemented negation $e';
-						eval(ENeg(EConst(eval(e, steps))), steps);
+						eval(ENeg(EConst(eval(e, state))), state);
 				}
 		}
+		state.currentLevel--;
+		switch (e) {
+			case EConst(_), EParenthesis(_):
+			case _: state.addStep(Result(result));
+		}
+		return result;
 	}
 }

@@ -30,16 +30,16 @@ class Ksi {
 		
 		parser.reset();
 		var expr = parser.parse();
-		var evalSteps = new List<EvalStep>();
-		var answer = ArithmeticEvaluator.eval(expr, evalSteps);
+		var evalState = new EvalState();
+		var answer = ArithmeticEvaluator.eval(expr, evalState);
 		return {
 			question: ArithmeticPrinter.printTex(expr),
 			answer: ""+ArithmeticPrinter.printTex(EConst(answer)),
 			debug:
+				"<h3>Evaluation steps</h3>" +
+				"<div class='steps eval'>" + evalState.steps.map(ArithmeticPrinter.printEvalStep).join("\n") + "</div>" +
 				expr+"<br/>" +
 				"<div class='tokens'>" + tokens + "</div>" +
-				"<h3>Evaluation steps</h3>" +
-				"<div class='steps eval'>" + evalSteps.map(ArithmeticPrinter.printEvalStep).join("<br/>") + "</div>" +
 				"<h3>Parsing steps</h3>" +
 				"<div class='steps parser'>" + parser.steps.join("<br/>") + "</div>"
 		};
