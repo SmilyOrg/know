@@ -57,7 +57,7 @@ var Know = function() {
 	this.outputQuestion = new js.JQuery("#question");
 	this.outputAnswer = new js.JQuery("#answer");
 	this.debug = new js.JQuery("#debug");
-	this.input.val("0xA+1+(2/3)^4/5");
+	this.input.val("1+0.123");
 	this.inputChange();
 	var runner = new haxe.unit.TestRunner();
 	runner.add(new test.Test());
@@ -96,6 +96,7 @@ Know.prototype = {
 			this.setColor(this.outputAnswer,Theme.normal);
 			this.typeset(this.outputQuestion[0]);
 			this.typeset(this.outputAnswer[0]);
+			this.typeset(this.debug[0]);
 		} catch( e1 ) {
 			this.info.text("Error: " + Std.string(e1));
 		}
@@ -153,6 +154,27 @@ List.prototype = {
 			return x;
 		}};
 	}
+	,join: function(sep) {
+		var s = new StringBuf();
+		var first = true;
+		var l = this.h;
+		while(l != null) {
+			if(first) first = false; else if(sep == null) s.b += "null"; else s.b += "" + sep;
+			s.b += Std.string(l[0]);
+			l = l[1];
+		}
+		return s.b;
+	}
+	,map: function(f) {
+		var b = new List();
+		var l = this.h;
+		while(l != null) {
+			var v = l[0];
+			l = l[1];
+			b.add(f(v));
+		}
+		return b;
+	}
 	,__class__: List
 };
 var IMap = function() { };
@@ -183,6 +205,9 @@ Std.parseInt = function(x) {
 	if(v == 0 && (HxOverrides.cca(x,1) == 120 || HxOverrides.cca(x,1) == 88)) v = parseInt(x);
 	if(isNaN(v)) return null;
 	return v;
+};
+Std.parseFloat = function(x) {
+	return parseFloat(x);
 };
 var StringBuf = function() {
 	this.b = "";
@@ -1977,9 +2002,10 @@ qa.NumberFormat.Decimal.__enum__ = qa.NumberFormat;
 qa.NumberFormat.Hexadecimal = ["Hexadecimal",2];
 qa.NumberFormat.Hexadecimal.toString = $estr;
 qa.NumberFormat.Hexadecimal.__enum__ = qa.NumberFormat;
-qa.Constant = { __ename__ : true, __constructs__ : ["CInteger","CRatio"] };
+qa.Constant = { __ename__ : true, __constructs__ : ["CInteger","CRational","CReal"] };
 qa.Constant.CInteger = function(n,format) { var $x = ["CInteger",0,n,format]; $x.__enum__ = qa.Constant; $x.toString = $estr; return $x; };
-qa.Constant.CRatio = function(n) { var $x = ["CRatio",1,n]; $x.__enum__ = qa.Constant; $x.toString = $estr; return $x; };
+qa.Constant.CRational = function(n) { var $x = ["CRational",1,n]; $x.__enum__ = qa.Constant; $x.toString = $estr; return $x; };
+qa.Constant.CReal = function(n) { var $x = ["CReal",2,n]; $x.__enum__ = qa.Constant; $x.toString = $estr; return $x; };
 qa.ArithmeticError = function(type) {
 	this.type = type;
 };
@@ -1994,8 +2020,49 @@ qa.MathError.DivisionByZero.toString = $estr;
 qa.MathError.DivisionByZero.__enum__ = qa.MathError;
 qa.MathError.UnsupportedOperation = function(msg) { var $x = ["UnsupportedOperation",1,msg]; $x.__enum__ = qa.MathError; $x.toString = $estr; return $x; };
 qa._Arithmetic = {};
+qa._Arithmetic.Real_Impl_ = function() { };
+qa._Arithmetic.Real_Impl_.__name__ = ["qa","_Arithmetic","Real_Impl_"];
+qa._Arithmetic.Real_Impl_.fromString = function(s) {
+	var n = Std.parseFloat(s);
+	if(Math.isNaN(n)) throw "Unable to convert from String to Float: " + s;
+	return js.Boot.__cast(n , Float);
+};
+qa._Arithmetic.Real_Impl_.toString = function(n) {
+	return "" + n;
+};
+qa._Arithmetic.Real_Impl_.negate = function(n) {
+	return -n;
+};
+qa._Arithmetic.Real_Impl_.abs = function(n) {
+	if(qa._Arithmetic.Real_Impl_.lessThan(n,0)) return -n; else return n;
+};
+qa._Arithmetic.Real_Impl_.pow = function(a,b) {
+	return Math.pow(a,b);
+};
+qa._Arithmetic.Real_Impl_.add = function(a,b) {
+	return a + b;
+};
+qa._Arithmetic.Real_Impl_.subtract = function(a,b) {
+	return a - b;
+};
+qa._Arithmetic.Real_Impl_.multiply = function(a,b) {
+	return a * b;
+};
+qa._Arithmetic.Real_Impl_.divide = function(a,b) {
+	return a / b;
+};
+qa._Arithmetic.Real_Impl_.greaterThan = function(a,b) {
+	return a > b;
+};
+qa._Arithmetic.Real_Impl_.lessThan = function(a,b) {
+	return a < b;
+};
 qa._Arithmetic.SimpleFraction_Impl_ = function() { };
 qa._Arithmetic.SimpleFraction_Impl_.__name__ = ["qa","_Arithmetic","SimpleFraction_Impl_"];
+qa._Arithmetic.SimpleFraction_Impl_.toReal = function(n) {
+	var v = n;
+	return qa._Arithmetic.Real_Impl_.divide(qa._Arithmetic.Integer_Impl_.toReal(v.a),qa._Arithmetic.Integer_Impl_.toReal(v.b));
+};
 qa._Arithmetic.SimpleFraction_Impl_.getNumerator = function(this1) {
 	return this1.a;
 };
@@ -2073,13 +2140,25 @@ qa._Arithmetic.SimpleFraction_Impl_.multiply = function(a,b) {
 qa._Arithmetic.SimpleFraction_Impl_.divide = function(a,b) {
 	var va = a;
 	var vb = b;
-	if(vb.a == 0) throw new qa.ArithmeticError(qa.MathError.DivisionByZero);
+	if(qa._Arithmetic.Integer_Impl_.toSimpleFraction(vb.a) == qa._Arithmetic.SimpleFraction_Impl_.ZERO) throw new qa.ArithmeticError(qa.MathError.DivisionByZero);
 	var r = { a : qa._Arithmetic.Integer_Impl_.multiply(va.a,vb.b), b : qa._Arithmetic.Integer_Impl_.multiply(va.b,vb.a)};
 	qa._Arithmetic.SimpleFraction_Impl_.post(r);
 	return r;
 };
 qa._Arithmetic.Integer_Impl_ = function() { };
 qa._Arithmetic.Integer_Impl_.__name__ = ["qa","_Arithmetic","Integer_Impl_"];
+qa._Arithmetic.Integer_Impl_.fromString = function(s) {
+	var n = Std.parseInt(s);
+	if(n == null) throw "Unable to convert from String to Integer: " + s;
+	var t = n;
+	return js.Boot.__cast(t , Int);
+};
+qa._Arithmetic.Integer_Impl_.toString = function(n) {
+	return "" + n;
+};
+qa._Arithmetic.Integer_Impl_.toSimpleFraction = function(n) {
+	return { a : n, b : 1};
+};
 qa._Arithmetic.Integer_Impl_.negate = function(n) {
 	return -n;
 };
@@ -2092,17 +2171,8 @@ qa._Arithmetic.Integer_Impl_.divideInteger = function(a,b) {
 qa._Arithmetic.Integer_Impl_.pow = function(a,b) {
 	return Math.floor(Math.pow(a,b));
 };
-qa._Arithmetic.Integer_Impl_.fromString = function(s) {
-	var n = Std.parseInt(s);
-	if(n == null) throw "Unable to convert from String to Integer: " + s;
-	var t = n;
-	return js.Boot.__cast(t , Int);
-};
-qa._Arithmetic.Integer_Impl_.toString = function(n) {
-	return "" + n;
-};
-qa._Arithmetic.Integer_Impl_.toSimpleFraction = function(n) {
-	return { a : n, b : 1};
+qa._Arithmetic.Integer_Impl_.toReal = function(n) {
+	return n;
 };
 qa._Arithmetic.Integer_Impl_.add = function(a,b) {
 	return a + b;
@@ -2141,6 +2211,28 @@ qa.ArithmeticExpr.EParenthesis = function(e) { var $x = ["EParenthesis",2,e]; $x
 qa.ArithmeticExpr.ENeg = function(e) { var $x = ["ENeg",3,e]; $x.__enum__ = qa.ArithmeticExpr; $x.toString = $estr; return $x; };
 qa.ArithmeticPrinter = function() { };
 qa.ArithmeticPrinter.__name__ = ["qa","ArithmeticPrinter"];
+qa.ArithmeticPrinter.printEvalStep = function(step) {
+	{
+		var p = step[3];
+		var c = step[2];
+		return "Promoted " + qa.ArithmeticPrinter.printConstant(c) + " to " + qa.ArithmeticPrinter.printConstant(p);
+	}
+};
+qa.ArithmeticPrinter.printConstant = function(c) {
+	var type;
+	switch(c[1]) {
+	case 0:
+		type = "integer";
+		break;
+	case 1:
+		type = "rational";
+		break;
+	case 2:
+		type = "real";
+		break;
+	}
+	return "" + type + " \\(" + qa.ArithmeticPrinter.printTexMath(qa.ArithmeticExpr.EConst(c)) + "\\)";
+};
 qa.ArithmeticPrinter.printTex = function(expr) {
 	return "$$" + qa.ArithmeticPrinter.printTexMath(expr) + "$$";
 };
@@ -2162,6 +2254,9 @@ qa.ArithmeticPrinter.printTexMath = function(expr) {
 		case 1:
 			var n1 = c[2];
 			return "\\frac{" + qa._Arithmetic.Integer_Impl_.toString(qa._Arithmetic.SimpleFraction_Impl_.getNumerator(n1)) + "}{" + qa._Arithmetic.Integer_Impl_.toString(qa._Arithmetic.SimpleFraction_Impl_.getDenominator(n1)) + "}";
+		case 2:
+			var n2 = c[2];
+			return "" + qa._Arithmetic.Real_Impl_.toString(n2);
 		}
 		break;
 	case 1:
@@ -2394,9 +2489,48 @@ qa.ArithmeticParser.prototype = $extend(hxparse.Parser_qa_ArithmeticLexer_qa_Ari
 	}
 	,__class__: qa.ArithmeticParser
 });
+qa.EvalStep = { __ename__ : true, __constructs__ : ["Promote"] };
+qa.EvalStep.Promote = function(c,p) { var $x = ["Promote",0,c,p]; $x.__enum__ = qa.EvalStep; $x.toString = $estr; return $x; };
 qa.ArithmeticEvaluator = function() { };
 qa.ArithmeticEvaluator.__name__ = ["qa","ArithmeticEvaluator"];
-qa.ArithmeticEvaluator["eval"] = function(e) {
+qa.ArithmeticEvaluator.getConstantRank = function(c) {
+	switch(c[1]) {
+	case 0:
+		return 0;
+	case 1:
+		return 1;
+	case 2:
+		return 2;
+	}
+};
+qa.ArithmeticEvaluator.changeRank = function(c,base,steps) {
+	var rb = qa.ArithmeticEvaluator.getConstantRank(base);
+	var rc = qa.ArithmeticEvaluator.getConstantRank(c);
+	while(rc != rb) {
+		if(rc < rb) {
+			var p = qa.ArithmeticEvaluator.promoteConst(c);
+			steps.add(qa.EvalStep.Promote(c,p));
+			c = p;
+		} else throw "Constant demotion not supported";
+		var nrc = qa.ArithmeticEvaluator.getConstantRank(c);
+		if(nrc == rc) throw "Constant rank change error " + Std.string(c) + "(" + rc + " == " + nrc + ") " + Std.string(base) + "(" + rb + ")";
+		rc = nrc;
+	}
+	return c;
+};
+qa.ArithmeticEvaluator.promoteConst = function(c) {
+	switch(c[1]) {
+	case 0:
+		var n = c[2];
+		return qa.Constant.CRational(qa._Arithmetic.Integer_Impl_.toSimpleFraction(n));
+	case 1:
+		var n1 = c[2];
+		return qa.Constant.CReal(qa._Arithmetic.SimpleFraction_Impl_.toReal(n1));
+	default:
+		throw "Unimplemented rank promotion for " + Std.string(c);
+	}
+};
+qa.ArithmeticEvaluator["eval"] = function(e,steps) {
 	switch(e[1]) {
 	case 0:
 		var c = e[2];
@@ -2405,180 +2539,152 @@ qa.ArithmeticEvaluator["eval"] = function(e) {
 		var e2 = e[4];
 		var e1 = e[3];
 		var op = e[2];
-		{
-			var a = e1;
-			switch(e1[1]) {
+		switch(e1[1]) {
+		case 0:
+			var a = e1[2];
+			switch(e1[2][1]) {
 			case 0:
-				switch(e1[2][1]) {
+				switch(e2[1]) {
 				case 0:
-					var b = e2;
-					switch(e2[1]) {
+					var b = e2[2];
+					switch(e2[2][1]) {
 					case 0:
-						switch(e2[2][1]) {
-						case 0:
-							var a1 = e1[2][2];
-							var opa = e1[2][3];
-							var opb = e2[2][3];
-							var b1 = e2[2][2];
-							var format;
-							switch(opa[1]) {
+						var a1 = e1[2][2];
+						var opa = e1[2][3];
+						var opb = e2[2][3];
+						var b1 = e2[2][2];
+						var format;
+						switch(opa[1]) {
+						case 2:
+							switch(opb[1]) {
 							case 2:
-								switch(opb[1]) {
-								case 2:
-									format = qa.NumberFormat.Hexadecimal;
-									break;
-								case 1:
-									format = qa.NumberFormat.Decimal;
-									break;
-								default:
-									format = qa.NumberFormat.None;
-								}
+								format = qa.NumberFormat.Hexadecimal;
 								break;
 							case 1:
-								switch(opb[1]) {
-								case 2:case 1:
-									format = qa.NumberFormat.Decimal;
-									break;
-								default:
-									format = qa.NumberFormat.None;
-								}
+								format = qa.NumberFormat.Decimal;
 								break;
 							default:
 								format = qa.NumberFormat.None;
 							}
-							switch(op[1]) {
-							case 0:
-								return qa.Constant.CInteger(qa._Arithmetic.Integer_Impl_.add(a1,b1),format);
-							case 1:
-								return qa.Constant.CInteger(qa._Arithmetic.Integer_Impl_.subtract(a1,b1),format);
-							case 2:
-								return qa.Constant.CInteger(qa._Arithmetic.Integer_Impl_.multiply(a1,b1),format);
-							case 3:
-								return qa.Constant.CRatio(qa._Arithmetic.Integer_Impl_.divide(a1,b1));
-							case 4:
-								return qa.Constant.CInteger(Math.floor(Math.pow(a1,b1)),qa.NumberFormat.None);
-							}
 							break;
 						case 1:
-							var a2 = e1[2][2];
-							return qa.ArithmeticEvaluator["eval"](qa.ArithmeticExpr.EBinop(op,qa.ArithmeticExpr.EConst(qa.Constant.CRatio(qa._Arithmetic.Integer_Impl_.toSimpleFraction(a2))),b));
+							switch(opb[1]) {
+							case 2:case 1:
+								format = qa.NumberFormat.Decimal;
+								break;
+							default:
+								format = qa.NumberFormat.None;
+							}
+							break;
+						default:
+							format = qa.NumberFormat.None;
 						}
-						break;
-					default:
-						if((function($this) {
-							var $r;
-							switch(e1[1]) {
-							case 0:
-								$r = true;
-								break;
-							default:
-								$r = false;
-							}
-							return $r;
-						}(this)) && (function($this) {
-							var $r;
-							switch(e2[1]) {
-							case 0:
-								$r = true;
-								break;
-							default:
-								$r = false;
-							}
-							return $r;
-						}(this))) throw "Unimplemented binop " + Std.string(op) + " " + Std.string(e1) + " " + Std.string(e2);
-						return qa.ArithmeticEvaluator["eval"](qa.ArithmeticExpr.EBinop(op,qa.ArithmeticExpr.EConst(qa.ArithmeticEvaluator["eval"](e1)),qa.ArithmeticExpr.EConst(qa.ArithmeticEvaluator["eval"](e2))));
-					}
-					break;
-				case 1:
-					switch(e2[1]) {
-					case 0:
-						switch(e2[2][1]) {
-						case 1:
-							var a3 = e1[2][2];
-							var b2 = e2[2][2];
-							switch(op[1]) {
-							case 0:
-								return qa.Constant.CRatio(qa._Arithmetic.SimpleFraction_Impl_.add(a3,b2));
-							case 1:
-								return qa.Constant.CRatio(qa._Arithmetic.SimpleFraction_Impl_.subtract(a3,b2));
-							case 2:
-								return qa.Constant.CRatio(qa._Arithmetic.SimpleFraction_Impl_.multiply(a3,b2));
-							case 3:
-								return qa.Constant.CRatio(qa._Arithmetic.SimpleFraction_Impl_.divide(a3,b2));
-							case 4:
-								return qa.Constant.CRatio((function($this) {
-									var $r;
-									var va = a3;
-									var vb = b2;
-									if(vb.b != 1) throw new qa.ArithmeticError(qa.MathError.UnsupportedOperation("Fractional powers not supported"));
-									var r = { a : Math.floor(Math.pow(va.a,vb.a)), b : Math.floor(Math.pow(va.b,vb.a))};
-									qa._Arithmetic.SimpleFraction_Impl_.post(r);
-									$r = r;
-									return $r;
-								}(this)));
-							}
-							break;
+						switch(op[1]) {
 						case 0:
-							var b3 = e2[2][2];
-							return qa.ArithmeticEvaluator["eval"](qa.ArithmeticExpr.EBinop(op,a,qa.ArithmeticExpr.EConst(qa.Constant.CRatio(qa._Arithmetic.Integer_Impl_.toSimpleFraction(b3)))));
+							return qa.Constant.CInteger(qa._Arithmetic.Integer_Impl_.add(a1,b1),format);
+						case 1:
+							return qa.Constant.CInteger(qa._Arithmetic.Integer_Impl_.subtract(a1,b1),format);
+						case 2:
+							return qa.Constant.CInteger(qa._Arithmetic.Integer_Impl_.multiply(a1,b1),format);
+						case 3:
+							return qa.Constant.CRational(qa._Arithmetic.Integer_Impl_.divide(a1,b1));
+						case 4:
+							return qa.Constant.CInteger(Math.floor(Math.pow(a1,b1)),qa.NumberFormat.None);
 						}
 						break;
 					default:
-						if((function($this) {
-							var $r;
-							switch(e1[1]) {
-							case 0:
-								$r = true;
-								break;
-							default:
-								$r = false;
-							}
-							return $r;
-						}(this)) && (function($this) {
-							var $r;
-							switch(e2[1]) {
-							case 0:
-								$r = true;
-								break;
-							default:
-								$r = false;
-							}
-							return $r;
-						}(this))) throw "Unimplemented binop " + Std.string(op) + " " + Std.string(e1) + " " + Std.string(e2);
-						return qa.ArithmeticEvaluator["eval"](qa.ArithmeticExpr.EBinop(op,qa.ArithmeticExpr.EConst(qa.ArithmeticEvaluator["eval"](e1)),qa.ArithmeticExpr.EConst(qa.ArithmeticEvaluator["eval"](e2))));
+						var ra = qa.ArithmeticEvaluator.getConstantRank(a);
+						var rb = qa.ArithmeticEvaluator.getConstantRank(b);
+						if(ra == rb) throw "Unimplemented binop " + Std.string(op) + " " + Std.string(e1) + " " + Std.string(e2);
+						return qa.ArithmeticEvaluator["eval"](rb > ra?qa.ArithmeticExpr.EBinop(op,qa.ArithmeticExpr.EConst(qa.ArithmeticEvaluator.changeRank(a,b,steps)),e2):qa.ArithmeticExpr.EBinop(op,e1,qa.ArithmeticExpr.EConst(qa.ArithmeticEvaluator.changeRank(b,a,steps))),steps);
 					}
 					break;
+				default:
+					return qa.ArithmeticEvaluator["eval"](qa.ArithmeticExpr.EBinop(op,qa.ArithmeticExpr.EConst(qa.ArithmeticEvaluator["eval"](e1,steps)),qa.ArithmeticExpr.EConst(qa.ArithmeticEvaluator["eval"](e2,steps))),steps);
 				}
 				break;
-			default:
-				if((function($this) {
-					var $r;
-					switch(e1[1]) {
-					case 0:
-						$r = true;
+			case 1:
+				switch(e2[1]) {
+				case 0:
+					var b = e2[2];
+					switch(e2[2][1]) {
+					case 1:
+						var a2 = e1[2][2];
+						var b2 = e2[2][2];
+						switch(op[1]) {
+						case 0:
+							return qa.Constant.CRational(qa._Arithmetic.SimpleFraction_Impl_.add(a2,b2));
+						case 1:
+							return qa.Constant.CRational(qa._Arithmetic.SimpleFraction_Impl_.subtract(a2,b2));
+						case 2:
+							return qa.Constant.CRational(qa._Arithmetic.SimpleFraction_Impl_.multiply(a2,b2));
+						case 3:
+							return qa.Constant.CRational(qa._Arithmetic.SimpleFraction_Impl_.divide(a2,b2));
+						case 4:
+							return qa.Constant.CRational((function($this) {
+								var $r;
+								var va = a2;
+								var vb = b2;
+								if(vb.b != 1) throw new qa.ArithmeticError(qa.MathError.UnsupportedOperation("Fractional powers not supported"));
+								var r = { a : Math.floor(Math.pow(va.a,vb.a)), b : Math.floor(Math.pow(va.b,vb.a))};
+								qa._Arithmetic.SimpleFraction_Impl_.post(r);
+								$r = r;
+								return $r;
+							}(this)));
+						}
 						break;
 					default:
-						$r = false;
+						var ra = qa.ArithmeticEvaluator.getConstantRank(a);
+						var rb = qa.ArithmeticEvaluator.getConstantRank(b);
+						if(ra == rb) throw "Unimplemented binop " + Std.string(op) + " " + Std.string(e1) + " " + Std.string(e2);
+						return qa.ArithmeticEvaluator["eval"](rb > ra?qa.ArithmeticExpr.EBinop(op,qa.ArithmeticExpr.EConst(qa.ArithmeticEvaluator.changeRank(a,b,steps)),e2):qa.ArithmeticExpr.EBinop(op,e1,qa.ArithmeticExpr.EConst(qa.ArithmeticEvaluator.changeRank(b,a,steps))),steps);
 					}
-					return $r;
-				}(this)) && (function($this) {
-					var $r;
-					switch(e2[1]) {
-					case 0:
-						$r = true;
+					break;
+				default:
+					return qa.ArithmeticEvaluator["eval"](qa.ArithmeticExpr.EBinop(op,qa.ArithmeticExpr.EConst(qa.ArithmeticEvaluator["eval"](e1,steps)),qa.ArithmeticExpr.EConst(qa.ArithmeticEvaluator["eval"](e2,steps))),steps);
+				}
+				break;
+			case 2:
+				switch(e2[1]) {
+				case 0:
+					var b = e2[2];
+					switch(e2[2][1]) {
+					case 2:
+						var a3 = e1[2][2];
+						var b3 = e2[2][2];
+						switch(op[1]) {
+						case 0:
+							return qa.Constant.CReal(qa._Arithmetic.Real_Impl_.add(a3,b3));
+						case 1:
+							return qa.Constant.CReal(qa._Arithmetic.Real_Impl_.subtract(a3,b3));
+						case 2:
+							return qa.Constant.CReal(qa._Arithmetic.Real_Impl_.multiply(a3,b3));
+						case 3:
+							return qa.Constant.CReal(qa._Arithmetic.Real_Impl_.divide(a3,b3));
+						case 4:
+							return qa.Constant.CReal(Math.pow(a3,b3));
+						}
 						break;
 					default:
-						$r = false;
+						var ra = qa.ArithmeticEvaluator.getConstantRank(a);
+						var rb = qa.ArithmeticEvaluator.getConstantRank(b);
+						if(ra == rb) throw "Unimplemented binop " + Std.string(op) + " " + Std.string(e1) + " " + Std.string(e2);
+						return qa.ArithmeticEvaluator["eval"](rb > ra?qa.ArithmeticExpr.EBinop(op,qa.ArithmeticExpr.EConst(qa.ArithmeticEvaluator.changeRank(a,b,steps)),e2):qa.ArithmeticExpr.EBinop(op,e1,qa.ArithmeticExpr.EConst(qa.ArithmeticEvaluator.changeRank(b,a,steps))),steps);
 					}
-					return $r;
-				}(this))) throw "Unimplemented binop " + Std.string(op) + " " + Std.string(e1) + " " + Std.string(e2);
-				return qa.ArithmeticEvaluator["eval"](qa.ArithmeticExpr.EBinop(op,qa.ArithmeticExpr.EConst(qa.ArithmeticEvaluator["eval"](e1)),qa.ArithmeticExpr.EConst(qa.ArithmeticEvaluator["eval"](e2))));
+					break;
+				default:
+					return qa.ArithmeticEvaluator["eval"](qa.ArithmeticExpr.EBinop(op,qa.ArithmeticExpr.EConst(qa.ArithmeticEvaluator["eval"](e1,steps)),qa.ArithmeticExpr.EConst(qa.ArithmeticEvaluator["eval"](e2,steps))),steps);
+				}
+				break;
 			}
+			break;
+		default:
+			return qa.ArithmeticEvaluator["eval"](qa.ArithmeticExpr.EBinop(op,qa.ArithmeticExpr.EConst(qa.ArithmeticEvaluator["eval"](e1,steps)),qa.ArithmeticExpr.EConst(qa.ArithmeticEvaluator["eval"](e2,steps))),steps);
 		}
 		break;
 	case 2:
 		var e11 = e[2];
-		return qa.ArithmeticEvaluator["eval"](e11);
+		return qa.ArithmeticEvaluator["eval"](e11,steps);
 	case 3:
 		var e3 = e[2];
 		switch(e3[1]) {
@@ -2590,7 +2696,20 @@ qa.ArithmeticEvaluator["eval"] = function(e) {
 				return qa.Constant.CInteger(-n,format1);
 			case 1:
 				var n1 = e3[2][2];
-				return qa.Constant.CRatio(qa._Arithmetic.SimpleFraction_Impl_.subtract(qa._Arithmetic.SimpleFraction_Impl_.ZERO,n1));
+				return qa.Constant.CRational(qa._Arithmetic.SimpleFraction_Impl_.subtract(qa._Arithmetic.SimpleFraction_Impl_.ZERO,n1));
+			default:
+				if((function($this) {
+					var $r;
+					switch(e3[1]) {
+					case 0:
+						$r = true;
+						break;
+					default:
+						$r = false;
+					}
+					return $r;
+				}(this))) throw "Unimplemented negation " + Std.string(e3);
+				return qa.ArithmeticEvaluator["eval"](qa.ArithmeticExpr.ENeg(qa.ArithmeticExpr.EConst(qa.ArithmeticEvaluator["eval"](e3,steps))),steps);
 			}
 			break;
 		default:
@@ -2605,7 +2724,7 @@ qa.ArithmeticEvaluator["eval"] = function(e) {
 				}
 				return $r;
 			}(this))) throw "Unimplemented negation " + Std.string(e3);
-			return qa.ArithmeticEvaluator["eval"](qa.ArithmeticExpr.ENeg(qa.ArithmeticExpr.EConst(qa.ArithmeticEvaluator["eval"](e3))));
+			return qa.ArithmeticEvaluator["eval"](qa.ArithmeticExpr.ENeg(qa.ArithmeticExpr.EConst(qa.ArithmeticEvaluator["eval"](e3,steps))),steps);
 		}
 		break;
 	}
@@ -2627,8 +2746,9 @@ qa.Ksi.prototype = {
 		this.lexer.reset(bytes);
 		this.parser.reset();
 		var expr = this.parser.parse();
-		var answer = qa.ArithmeticEvaluator["eval"](expr);
-		return { question : qa.ArithmeticPrinter.printTex(expr), answer : "" + qa.ArithmeticPrinter.printTex(qa.ArithmeticExpr.EConst(answer)), debug : Std.string(expr) + "<br/>" + "<div class='tokens'>" + tokens + "</div>" + "<div class='steps'>" + this.parser.steps.join("<br/>") + "</div>"};
+		var evalSteps = new List();
+		var answer = qa.ArithmeticEvaluator["eval"](expr,evalSteps);
+		return { question : qa.ArithmeticPrinter.printTex(expr), answer : "" + qa.ArithmeticPrinter.printTex(qa.ArithmeticExpr.EConst(answer)), debug : Std.string(expr) + "<br/>" + "<div class='tokens'>" + tokens + "</div>" + "<h3>Evaluation steps</h3>" + "<div class='steps eval'>" + evalSteps.map(qa.ArithmeticPrinter.printEvalStep).join("<br/>") + "</div>" + "<h3>Parsing steps</h3>" + "<div class='steps parser'>" + this.parser.steps.join("<br/>") + "</div>"};
 	}
 	,__class__: qa.Ksi
 };
@@ -2722,29 +2842,39 @@ hxmath._BigInt.BigInt_Impl_.MUL_MASK = 32767;
 hxparse.LexEngine.MAX_CODE = 255;
 hxparse.LexEngine.EMPTY = [];
 hxparse.LexEngine.ALL_CHARS = [{ min : 0, max : 255}];
+qa._Arithmetic.Real_Impl_.ZERO = 0;
 qa._Arithmetic.SimpleFraction_Impl_.ZERO = { a : 0, b : 0};
 qa._Arithmetic.Integer_Impl_.ZERO = 0;
+qa._Arithmetic.Integer_Impl_.ONE = 1;
 qa.ArithmeticLexer.tok = hxparse.Lexer.buildRuleset([{ rule : "0x[0-9a-fA-F]+", func : function(lexer) {
 	return qa.ArithmeticToken.TConst(qa.Constant.CInteger(qa._Arithmetic.Integer_Impl_.fromString(lexer.current),qa.NumberFormat.Hexadecimal));
 }},{ rule : "[0-9]+", func : function(lexer1) {
 	return qa.ArithmeticToken.TConst(qa.Constant.CInteger(qa._Arithmetic.Integer_Impl_.fromString(lexer1.current),qa.NumberFormat.Decimal));
-}},{ rule : "\\(", func : function(lexer2) {
+}},{ rule : "[0-9]+\\.[0-9]+", func : function(lexer2) {
+	return qa.ArithmeticToken.TConst(qa.Constant.CReal(qa._Arithmetic.Real_Impl_.fromString(lexer2.current)));
+}},{ rule : "\\.[0-9]+", func : function(lexer3) {
+	return qa.ArithmeticToken.TConst(qa.Constant.CReal(qa._Arithmetic.Real_Impl_.fromString(lexer3.current)));
+}},{ rule : "[0-9]+[eE][\\+\\-]?[0-9]+", func : function(lexer4) {
+	return qa.ArithmeticToken.TConst(qa.Constant.CReal(qa._Arithmetic.Real_Impl_.fromString(lexer4.current)));
+}},{ rule : "[0-9]+\\.[0-9]*[eE][\\+\\-]?[0-9]+", func : function(lexer5) {
+	return qa.ArithmeticToken.TConst(qa.Constant.CReal(qa._Arithmetic.Real_Impl_.fromString(lexer5.current)));
+}},{ rule : "\\(", func : function(lexer6) {
 	return qa.ArithmeticToken.TPOpen;
-}},{ rule : "\\)", func : function(lexer3) {
+}},{ rule : "\\)", func : function(lexer7) {
 	return qa.ArithmeticToken.TPClose;
-}},{ rule : "\\+", func : function(lexer4) {
+}},{ rule : "\\+", func : function(lexer8) {
 	return qa.ArithmeticToken.TBinop(qa.ArithmeticBinop.OpAdd);
-}},{ rule : "\\-", func : function(lexer5) {
+}},{ rule : "\\-", func : function(lexer9) {
 	return qa.ArithmeticToken.TBinop(qa.ArithmeticBinop.OpSub);
-}},{ rule : "\\*", func : function(lexer6) {
+}},{ rule : "\\*", func : function(lexer10) {
 	return qa.ArithmeticToken.TBinop(qa.ArithmeticBinop.OpMul);
-}},{ rule : "\\/", func : function(lexer7) {
+}},{ rule : "\\/", func : function(lexer11) {
 	return qa.ArithmeticToken.TBinop(qa.ArithmeticBinop.OpDiv);
-}},{ rule : "\\^", func : function(lexer8) {
+}},{ rule : "\\^", func : function(lexer12) {
 	return qa.ArithmeticToken.TBinop(qa.ArithmeticBinop.OpPow);
-}},{ rule : "[\r\n\t ]", func : function(lexer9) {
-	return lexer9.token(qa.ArithmeticLexer.tok);
-}},{ rule : "", func : function(lexer10) {
+}},{ rule : "[\r\n\t ]", func : function(lexer13) {
+	return lexer13.token(qa.ArithmeticLexer.tok);
+}},{ rule : "", func : function(lexer14) {
 	return qa.ArithmeticToken.TEof;
 }}],"tok");
 qa.ArithmeticLexer.generatedRulesets = [qa.ArithmeticLexer.tok];
