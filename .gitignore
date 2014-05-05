@@ -2,3 +2,4 @@ bin/know.js
 bin/know.js.map
 bin/style.min.css
 src/Version.hx
+updatePages.bat
