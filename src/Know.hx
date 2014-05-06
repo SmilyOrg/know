@@ -63,6 +63,7 @@ class Know {
 		//input.val("1-2*3+3*2^5*5");
 		//input.val("1+2*3^4*5+6");
 		input.val("1+2*3^4*5+1*1-1+1");
+		//input.val("1^2*3+4");
 		inputChange();
 		
 		var runner = new TestRunner();
@@ -97,7 +98,8 @@ class Know {
 			
 			typeset(outputQuestion[0]);
 			typeset(outputAnswer[0]);
-			typeset(J(".steps .eval")[0]);
+			typeset(debug[0]);
+			//typeset(J(".steps .eval")[0]);
 			
 		//} catch (e:NoMatch<Dynamic>) {
 		} catch (e:Dynamic) {

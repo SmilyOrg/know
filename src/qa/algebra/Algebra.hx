@@ -19,9 +19,9 @@ class Algebra {
 	
 	public static function getPrecedenceRank(op:AlgebraBinop) {
 		return switch (op) {
-			//case OpAdd:        0;
-			//case OpSub:        1;
-			case OpAdd, OpSub: 0;
+			case OpAdd:        0;
+			case OpSub:        1;
+			//case OpAdd, OpSub: 0;
 			case OpMul, OpDiv: 2;
 			case OpPow:        3;
 		}

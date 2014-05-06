@@ -70,14 +70,14 @@ class AlgebraParser extends hxparse.Parser<AlgebraLexer, AlgebraToken> implement
 	//*/
 	
 	public function parse():MathExpression {
-		//step("parse");
+		step("parse");
 		var e = switch stream {
 			case [TBinop(OpSub), e = parseElement()]:
 				parseNext(ENeg(e));
 			case _:
 				parseNext(parseElement());
 		}
-		//step("postparse "+peek(0));
+		step("postparse "+peek(0));
 		return e;
 	}
 	
@@ -93,27 +93,34 @@ class AlgebraParser extends hxparse.Parser<AlgebraLexer, AlgebraToken> implement
 	}
 
 	function parseNext(e1:MathExpression):MathExpression {
-		//step("parseNext");
+		step("parseNext");
 		return switch stream {
 			case [TBinop(op), e2 = parse()]:
-				step('binop $op $e1 $e2');
-				binop(e1, op, e2);
+				binop(op, e1, e2);
 			case _:
 				step('pass $e1');
 				e1;
 		}
 	}
 
-	function binop(e1:MathExpression, op:AlgebraBinop, e2:MathExpression):MathExpression {
-		return switch [e1, e2] {
-			// TODO fix power precedence
+	function binop(op:AlgebraBinop, e1:MathExpression, e2:MathExpression):MathExpression {
+		//step('binop $op $e1 $e2');
+		step('B $op');
+		step(AlgebraPrinter.printTexInline(e1));
+		step(AlgebraPrinter.printTexInline(e2));
+		var ret = switch [e1, e2] {
 			case [_, EBinop(e2op, e21, e22)] if (op.getPrecedenceRank() > e2op.getPrecedenceRank()):
 			//case [EBinop(e1op, e11, e12), EBinop(e2op, e21, e22)] if (op.getPrecedenceRank() > e2op.getPrecedenceRank()):
 				//step('binopswitch e1=$e1 op=$op e2=$e2 op2=$op2 e3=$e3 e4=$e4');
-				EBinop(e2op, EBinop(op, e1, e21), e22);
+				step('binopswitch $e2op $e21 $e22');
+				//EBinop(e2op, EBinop(op, e1, e21), e22);
+				//binop(e2op, EBinop(op, e1, e21), e22);
+				EBinop(e2op, binop(op, e1, e21), e22);
 			case _:
 				step('binoppass $e1 $op $e2');
 				EBinop(op, e1, e2);
 		}
+		//step(AlgebraPrinter.printTex(ret));
+		return ret;
 	}
 }
