@@ -1,6 +1,7 @@
 package test;
 import haxe.unit.TestCase;
-import qa.Arithmetic.Integer;
+
+import qa.arithmetic.Arithmetic;
 
 class Test extends TestCase {
 	public function testAddZero() {

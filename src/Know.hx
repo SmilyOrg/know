@@ -6,7 +6,6 @@ import js.html.Element;
 import js.JQuery;
 import js.JQuery.JQueryHelper.J;
 import js.Lib;
-import qa.Arithmetic.ArithmeticToken;
 import test.Test;
 
 import qa.Ksi;
@@ -55,8 +54,15 @@ class Know {
 		//input.val("-1/2");
 		//input.val("-1+1");
 		//input.val("(2/3)^4");
-		input.val("0xA+1+(-2/3)^4/5");
+		//input.val("0xA+1+(-2/3)^4/5");
 		//input.val("1+0.123");
+		//input.val("x+1");
+		//input.val("2*3+(x/2+1)*2-4+1");
+		//input.val("1*1-1+1");
+		//input.val("1+1");
+		//input.val("1-2*3+3*2^5*5");
+		//input.val("1+2*3^4*5+6");
+		input.val("1+2*3^4*5+1*1-1+1");
 		inputChange();
 		
 		var runner = new TestRunner();

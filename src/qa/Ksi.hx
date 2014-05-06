@@ -1,6 +1,8 @@
 package qa;
 import byte.ByteData;
-import qa.Arithmetic;
+import qa.algebra.Parser;
+import qa.algebra.Algebra;
+import qa.algebra.Evaluation;
 
 typedef Answer = {
 	question:String,
@@ -10,12 +12,12 @@ typedef Answer = {
 
 class Ksi {
 	
-	var lexer:ArithmeticLexer;
-	var parser:ArithmeticParser;
+	var lexer:AlgebraLexer;
+	var parser:AlgebraParser;
 	
 	public function new() {
-		lexer = new ArithmeticLexer();
-		parser = new ArithmeticParser(lexer, ArithmeticLexer.tok);
+		lexer = new AlgebraLexer();
+		parser = new AlgebraParser(lexer, AlgebraLexer.tok);
 	}
 	
 	public function answer(text:String):Answer {
@@ -24,20 +26,21 @@ class Ksi {
 		var tokens = "";
 		lexer.reset(bytes);
 		var tok;
-		while ((tok = lexer.token(ArithmeticLexer.tok)) != TEof) tokens += tok+"<br/>";
+		while ((tok = lexer.token(AlgebraLexer.tok)) != TEof) tokens += tok+"<br/>";
 		
 		lexer.reset(bytes);
 		
 		parser.reset();
 		var expr = parser.parse();
 		var evalState = new EvalState();
-		var answer = ArithmeticEvaluator.eval(expr, evalState);
+		var answer = AlgebraEvaluator.eval(expr, evalState);
 		return {
-			question: ArithmeticPrinter.printTex(expr),
-			answer: ""+ArithmeticPrinter.printTex(EConst(answer)),
+			question: AlgebraPrinter.printTex(expr),
+			//answer: ""+AlgebraPrinter.printTex(ESymbol(SConst(answer))),
+			answer: ""+AlgebraPrinter.printTex(answer),
 			debug:
 				"<h3>Evaluation steps</h3>" +
-				"<div class='steps eval'>" + evalState.steps.map(ArithmeticPrinter.printEvalStep).join("\n") + "</div>" +
+				"<div class='steps eval'>" + evalState.steps.map(AlgebraPrinter.printEvalStep).join("\n") + "</div>" +
 				expr+"<br/>" +
 				"<div class='tokens'>" + tokens + "</div>" +
 				"<h3>Parsing steps</h3>" +

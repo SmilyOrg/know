@@ -29,7 +29,6 @@
   <!-- haxelib libraries -->
   <haxelib>
     <library name="hxparse" />
-    <library name="hxmath" />
   </haxelib>
   <!-- Class files to compile (other referenced classes will automatically be included) -->
   <compileTargets>
