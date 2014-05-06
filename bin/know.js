@@ -1,4 +1,5 @@
 (function () { "use strict";
+var $estr = function() { return js.Boot.__string_rec(this,''); };
 function $extend(from, fields) {
 	function Inherit() {} Inherit.prototype = from; var proto = new Inherit();
 	for (var name in fields) proto[name] = fields[name];
@@ -56,7 +57,7 @@ var Know = function() {
 	this.outputQuestion = new js.JQuery("#question");
 	this.outputAnswer = new js.JQuery("#answer");
 	this.debug = new js.JQuery("#debug");
-	this.input.val("0xA+1+(-2/3)^4/5");
+	this.input.val("1+2*3^4*5+1*1-1+1");
 	this.inputChange();
 	var runner = new haxe.unit.TestRunner();
 	runner.add(new test.Test());
@@ -95,7 +96,7 @@ Know.prototype = {
 			this.setColor(this.outputAnswer,Theme.normal);
 			this.typeset(this.outputQuestion[0]);
 			this.typeset(this.outputAnswer[0]);
-			this.typeset(new js.JQuery(".steps .eval")[0]);
+			this.typeset(this.debug[0]);
 		} catch( e1 ) {
 			this.info.text("Error: " + Std.string(e1));
 		}
@@ -224,6 +225,9 @@ StringTools.htmlEscape = function(s,quotes) {
 };
 StringTools.startsWith = function(s,start) {
 	return s.length >= start.length && HxOverrides.substr(s,0,start.length) == start;
+};
+StringTools.replace = function(s,sub,by) {
+	return s.split(sub).join(by);
 };
 StringTools.hex = function(n,digits) {
 	var s = "";
@@ -475,11 +479,12 @@ byte.js._ByteData.ByteData_Impl_.ofString = function(s) {
 var haxe = {};
 haxe.StackItem = { __ename__ : true, __constructs__ : ["CFunction","Module","FilePos","Method","LocalFunction"] };
 haxe.StackItem.CFunction = ["CFunction",0];
+haxe.StackItem.CFunction.toString = $estr;
 haxe.StackItem.CFunction.__enum__ = haxe.StackItem;
-haxe.StackItem.Module = function(m) { var $x = ["Module",1,m]; $x.__enum__ = haxe.StackItem; return $x; };
-haxe.StackItem.FilePos = function(s,file,line) { var $x = ["FilePos",2,s,file,line]; $x.__enum__ = haxe.StackItem; return $x; };
-haxe.StackItem.Method = function(classname,method) { var $x = ["Method",3,classname,method]; $x.__enum__ = haxe.StackItem; return $x; };
-haxe.StackItem.LocalFunction = function(v) { var $x = ["LocalFunction",4,v]; $x.__enum__ = haxe.StackItem; return $x; };
+haxe.StackItem.Module = function(m) { var $x = ["Module",1,m]; $x.__enum__ = haxe.StackItem; $x.toString = $estr; return $x; };
+haxe.StackItem.FilePos = function(s,file,line) { var $x = ["FilePos",2,s,file,line]; $x.__enum__ = haxe.StackItem; $x.toString = $estr; return $x; };
+haxe.StackItem.Method = function(classname,method) { var $x = ["Method",3,classname,method]; $x.__enum__ = haxe.StackItem; $x.toString = $estr; return $x; };
+haxe.StackItem.LocalFunction = function(v) { var $x = ["LocalFunction",4,v]; $x.__enum__ = haxe.StackItem; $x.toString = $estr; return $x; };
 haxe.CallStack = function() { };
 haxe.CallStack.__name__ = ["haxe","CallStack"];
 haxe.CallStack.exceptionStack = function() {
@@ -576,12 +581,15 @@ haxe.io.Eof.prototype = {
 };
 haxe.io.Error = { __ename__ : true, __constructs__ : ["Blocked","Overflow","OutsideBounds","Custom"] };
 haxe.io.Error.Blocked = ["Blocked",0];
+haxe.io.Error.Blocked.toString = $estr;
 haxe.io.Error.Blocked.__enum__ = haxe.io.Error;
 haxe.io.Error.Overflow = ["Overflow",1];
+haxe.io.Error.Overflow.toString = $estr;
 haxe.io.Error.Overflow.__enum__ = haxe.io.Error;
 haxe.io.Error.OutsideBounds = ["OutsideBounds",2];
+haxe.io.Error.OutsideBounds.toString = $estr;
 haxe.io.Error.OutsideBounds.__enum__ = haxe.io.Error;
-haxe.io.Error.Custom = function(e) { var $x = ["Custom",3,e]; $x.__enum__ = haxe.io.Error; return $x; };
+haxe.io.Error.Custom = function(e) { var $x = ["Custom",3,e]; $x.__enum__ = haxe.io.Error; $x.toString = $estr; return $x; };
 haxe.unit = {};
 haxe.unit.TestCase = function() {
 };
@@ -777,281 +785,6 @@ haxe.unit.TestStatus.prototype = {
 	,posInfos: null
 	,backtrace: null
 	,__class__: haxe.unit.TestStatus
-};
-var hxmath = {};
-hxmath._BigInt = {};
-hxmath._BigInt.BigInt_Impl_ = function() { };
-hxmath._BigInt.BigInt_Impl_.__name__ = ["hxmath","_BigInt","BigInt_Impl_"];
-hxmath._BigInt.BigInt_Impl_.get_impl = function(this1) {
-	return this1;
-};
-hxmath._BigInt.BigInt_Impl_._new = function() {
-	var this1;
-	this1 = { chunks : new Array(), signum : 0};
-	return this1;
-};
-hxmath._BigInt.BigInt_Impl_.alloc = function() {
-	return { chunks : new Array(), signum : 0};
-};
-hxmath._BigInt.BigInt_Impl_.ofInt = function(n) {
-	var bn;
-	var this1;
-	this1 = { chunks : new Array(), signum : 0};
-	bn = this1;
-	if(n < 0) {
-		bn.signum = -1;
-		n = -n;
-	} else if(n > 0) bn.signum = 1; else return bn;
-	while(n != 0) {
-		bn.chunks.push(n & 1073741823);
-		n >>>= 30;
-	}
-	return bn;
-};
-hxmath._BigInt.BigInt_Impl_.ofFloat = function(n) {
-	var bn;
-	var this1;
-	this1 = { chunks : new Array(), signum : 0};
-	bn = this1;
-	if(n < 0) {
-		bn.signum = -1;
-		n = -n;
-	} else if(n > 0) bn.signum = 1;
-	n = Math.floor(n);
-	while(n != 0) {
-		bn.chunks.push(n % 1073741824. | 0);
-		n = Math.floor(n / 1073741824.);
-	}
-	return bn;
-};
-hxmath._BigInt.BigInt_Impl_.ofString = function(n) {
-	var this1;
-	this1 = { chunks : new Array(), signum : 0};
-	return this1;
-};
-hxmath._BigInt.BigInt_Impl_.toInt = function(this1) {
-	var n = 0;
-	var i = this1.chunks.length - 1;
-	while(i >= 0) {
-		n <<= 30;
-		n |= this1.chunks[i];
-		i--;
-	}
-	return n * this1.signum;
-};
-hxmath._BigInt.BigInt_Impl_.toFloat = function(this1) {
-	var n = 0.0;
-	var i = this1.chunks.length - 1;
-	while(i >= 0) {
-		n *= 1073741824.;
-		n += this1.chunks[i];
-		i--;
-	}
-	return n * this1.signum;
-};
-hxmath._BigInt.BigInt_Impl_.toString = function(this1) {
-	return "0";
-};
-hxmath._BigInt.BigInt_Impl_.eq = function(lhs,rhs) {
-	if(lhs.signum != rhs.signum) return false;
-	if(lhs.chunks.length != rhs.chunks.length) return false;
-	var _g1 = 0;
-	var _g = lhs.chunks.length;
-	while(_g1 < _g) {
-		var i = _g1++;
-		if(lhs.chunks[i] != rhs.chunks[i]) return false;
-	}
-	return true;
-};
-hxmath._BigInt.BigInt_Impl_.neq = function(lhs,rhs) {
-	return !hxmath._BigInt.BigInt_Impl_.eq(lhs,rhs);
-};
-hxmath._BigInt.BigInt_Impl_.eqInt = function(lhs,rhs) {
-	return hxmath._BigInt.BigInt_Impl_.eq(lhs,hxmath._BigInt.BigInt_Impl_.ofInt(rhs));
-};
-hxmath._BigInt.BigInt_Impl_.neqInt = function(lhs,rhs) {
-	var rhs1 = hxmath._BigInt.BigInt_Impl_.ofInt(rhs);
-	return !hxmath._BigInt.BigInt_Impl_.eq(lhs,rhs1);
-};
-hxmath._BigInt.BigInt_Impl_.add = function(lhs,rhs) {
-	if(lhs.signum == 0) return rhs;
-	if(rhs.signum == 0) return lhs;
-	if(hxmath._BigInt.BigInt_Impl_._compareMagnitude(lhs,rhs) == 1) {
-		var temp = lhs;
-		lhs = rhs;
-		rhs = temp;
-	}
-	if(lhs.signum == rhs.signum) return hxmath._BigInt.BigInt_Impl_._add(lhs,rhs); else return hxmath._BigInt.BigInt_Impl_._sub(lhs,rhs);
-};
-hxmath._BigInt.BigInt_Impl_.sub = function(lhs,rhs) {
-	var this1;
-	this1 = { chunks : new Array(), signum : 0};
-	return this1;
-};
-hxmath._BigInt.BigInt_Impl_._compareMagnitude = function(a,b) {
-	if(a.chunks.length > b.chunks.length) return -1;
-	if(a.chunks.length < b.chunks.length) return 1;
-	var i = a.chunks.length;
-	while(i >= 0) {
-		if(a.chunks[i] > b.chunks[i]) return -1;
-		if(a.chunks[i] < b.chunks[i]) return 1;
-		i--;
-	}
-	return 0;
-};
-hxmath._BigInt.BigInt_Impl_._add = function(big,small) {
-	var out;
-	var this1;
-	this1 = { chunks : new Array(), signum : 0};
-	out = this1;
-	var carry = 0;
-	var _g1 = 0;
-	var _g = big.chunks.length;
-	while(_g1 < _g) {
-		var i = _g1++;
-		var sum = big.chunks[i] + small.chunks[i] + carry;
-		carry = sum >>> 30;
-		sum &= 1073741823;
-		out.chunks.push(sum);
-	}
-	var _g11 = big.chunks.length;
-	var _g2 = small.chunks.length;
-	while(_g11 < _g2) {
-		var i1 = _g11++;
-		var sum1 = big.chunks[i1] + carry;
-		carry = sum1 >>> 30;
-		sum1 &= 1073741823;
-		out.chunks.push(sum1);
-	}
-	if(carry == 1) out.chunks.push(1);
-	out.signum = big.signum;
-	return out;
-};
-hxmath._BigInt.BigInt_Impl_._sub = function(big,small) {
-	var out;
-	var this1;
-	this1 = { chunks : new Array(), signum : 0};
-	out = this1;
-	var borrow = 0;
-	var _g1 = 0;
-	var _g = big.chunks.length;
-	while(_g1 < _g) {
-		var i = _g1++;
-		var diff = big.chunks[i] - small.chunks[i] - borrow;
-		borrow = diff >>> 30;
-		diff &= 1073741823;
-		out.chunks.push(diff);
-	}
-	var _g11 = big.chunks.length;
-	var _g2 = small.chunks.length;
-	while(_g11 < _g2) {
-		var i1 = _g11++;
-		var diff1 = big.chunks[i1] - borrow;
-		borrow = diff1 >>> 30;
-		diff1 &= 1073741823;
-		out.chunks.push(diff1);
-	}
-	if(borrow == 1) out.chunks.push(1);
-	out.signum = big.signum;
-	return out;
-};
-hxmath._BigInt.BigInt_Impl_.mul2 = function(lhs,rhs) {
-	var outChunks = new Array();
-	var product;
-	var carry = 0;
-	var _g1 = 0;
-	var _g = lhs.chunks.length + rhs.chunks.length;
-	while(_g1 < _g) {
-		var i = _g1++;
-		outChunks[i] = 0;
-	}
-	var _g11 = 0;
-	var _g2 = rhs.chunks.length;
-	while(_g11 < _g2) {
-		var j = _g11++;
-		var _g3 = 0;
-		var _g21 = lhs.chunks.length;
-		while(_g3 < _g21) {
-			var i1 = _g3++;
-			product = outChunks[i1 + j] + lhs.chunks[i1] * rhs.chunks[j] + carry;
-			outChunks[i1 + j] = product & 1073741823;
-			carry = product >>> 30;
-		}
-		outChunks[j + lhs.chunks.length] = carry;
-	}
-	var n;
-	var this1;
-	this1 = { chunks : new Array(), signum : 0};
-	n = this1;
-	var i2 = outChunks.length - 1;
-	while(i2 >= 0 && outChunks[i2] == 0) i2--;
-	n.chunks = outChunks.slice(0,i2 + 1);
-	n.signum = lhs.signum * rhs.signum;
-	return n;
-};
-hxmath._BigInt.BigInt_Impl_.mul = function(lhs,rhs) {
-	var outChunks = new Array();
-	var product;
-	var carry = 0;
-	var _g1 = 0;
-	var _g = lhs.chunks.length + rhs.chunks.length;
-	while(_g1 < _g) {
-		var i = _g1++;
-		outChunks[i] = 0;
-	}
-	var _g11 = 0;
-	var _g2 = rhs.chunks.length;
-	while(_g11 < _g2) {
-		var j = _g11++;
-		var _g3 = 0;
-		var _g21 = lhs.chunks.length;
-		while(_g3 < _g21) {
-			var i1 = _g3++;
-			var rLow = rhs.chunks[i1] & 32767;
-			var rHigh = rhs.chunks[i1] >>> 15;
-			var lLow = lhs.chunks[j] & 32767;
-			var lHigh = lhs.chunks[j] >>> 15;
-			var p00 = rLow * lLow;
-			var p01 = rLow * lHigh;
-			var p10 = rHigh * lLow;
-			var p11 = rHigh * lHigh;
-			haxe.Log.trace("" + rHigh + " " + rLow + "  " + lHigh + " " + lLow,{ fileName : "BigInt.hx", lineNumber : 235, className : "hxmath._BigInt.BigInt_Impl_", methodName : "mul"});
-			haxe.Log.trace("" + p00 + " " + p01 + " " + p10 + " " + p11,{ fileName : "BigInt.hx", lineNumber : 236, className : "hxmath._BigInt.BigInt_Impl_", methodName : "mul"});
-			var productLow = ((p01 & 32767) << 15) + ((p10 & 32767) << 15) + p00;
-			productLow += outChunks[i1 + j] + carry;
-			var productHigh = p11 + (p01 >>> 15) + (p10 >>> 15);
-			productHigh += productLow >>> 30;
-			productLow &= 1073741823;
-			outChunks[i1 + j] = productLow;
-			carry = productHigh;
-		}
-		outChunks[j + lhs.chunks.length] = carry;
-	}
-	var n;
-	var this1;
-	this1 = { chunks : new Array(), signum : 0};
-	n = this1;
-	n.chunks = outChunks;
-	n.signum = lhs.signum * rhs.signum;
-	hxmath._BigInt.BigInt_Impl_.trimLeadingZeroes(n);
-	return n;
-};
-hxmath._BigInt.BigInt_Impl_.div = function(lhs,rhs) {
-	var this1;
-	this1 = { chunks : new Array(), signum : 0};
-	return this1;
-};
-hxmath._BigInt.BigInt_Impl_.neg = function(n) {
-	var out;
-	var this1;
-	this1 = { chunks : new Array(), signum : 0};
-	out = this1;
-	out.chunks = n.chunks;
-	out.signum = -n.signum;
-	return out;
-};
-hxmath._BigInt.BigInt_Impl_.trimLeadingZeroes = function(this1) {
-	while(this1.chunks[this1.chunks.length - 1] == 0) this1.chunks.pop();
 };
 var hxparse = {};
 hxparse.LexEngine = function(patterns) {
@@ -1486,13 +1219,14 @@ hxparse.LexEngine.prototype = {
 hxparse._LexEngine = {};
 hxparse._LexEngine.Pattern = { __ename__ : true, __constructs__ : ["Empty","Match","Star","Plus","Next","Choice","Group"] };
 hxparse._LexEngine.Pattern.Empty = ["Empty",0];
+hxparse._LexEngine.Pattern.Empty.toString = $estr;
 hxparse._LexEngine.Pattern.Empty.__enum__ = hxparse._LexEngine.Pattern;
-hxparse._LexEngine.Pattern.Match = function(c) { var $x = ["Match",1,c]; $x.__enum__ = hxparse._LexEngine.Pattern; return $x; };
-hxparse._LexEngine.Pattern.Star = function(p) { var $x = ["Star",2,p]; $x.__enum__ = hxparse._LexEngine.Pattern; return $x; };
-hxparse._LexEngine.Pattern.Plus = function(p) { var $x = ["Plus",3,p]; $x.__enum__ = hxparse._LexEngine.Pattern; return $x; };
-hxparse._LexEngine.Pattern.Next = function(p1,p2) { var $x = ["Next",4,p1,p2]; $x.__enum__ = hxparse._LexEngine.Pattern; return $x; };
-hxparse._LexEngine.Pattern.Choice = function(p1,p2) { var $x = ["Choice",5,p1,p2]; $x.__enum__ = hxparse._LexEngine.Pattern; return $x; };
-hxparse._LexEngine.Pattern.Group = function(p) { var $x = ["Group",6,p]; $x.__enum__ = hxparse._LexEngine.Pattern; return $x; };
+hxparse._LexEngine.Pattern.Match = function(c) { var $x = ["Match",1,c]; $x.__enum__ = hxparse._LexEngine.Pattern; $x.toString = $estr; return $x; };
+hxparse._LexEngine.Pattern.Star = function(p) { var $x = ["Star",2,p]; $x.__enum__ = hxparse._LexEngine.Pattern; $x.toString = $estr; return $x; };
+hxparse._LexEngine.Pattern.Plus = function(p) { var $x = ["Plus",3,p]; $x.__enum__ = hxparse._LexEngine.Pattern; $x.toString = $estr; return $x; };
+hxparse._LexEngine.Pattern.Next = function(p1,p2) { var $x = ["Next",4,p1,p2]; $x.__enum__ = hxparse._LexEngine.Pattern; $x.toString = $estr; return $x; };
+hxparse._LexEngine.Pattern.Choice = function(p1,p2) { var $x = ["Choice",5,p1,p2]; $x.__enum__ = hxparse._LexEngine.Pattern; $x.toString = $estr; return $x; };
+hxparse._LexEngine.Pattern.Group = function(p) { var $x = ["Group",6,p]; $x.__enum__ = hxparse._LexEngine.Pattern; $x.toString = $estr; return $x; };
 hxparse._LexEngine.Node = function(id,pid) {
 	this.id = id;
 	this.pid = pid;
@@ -1659,12 +1393,12 @@ hxparse.Parser.prototype = {
 };
 hxparse.ParserBuilder = function() { };
 hxparse.ParserBuilder.__name__ = ["hxparse","ParserBuilder"];
-hxparse.Parser_qa_ArithmeticLexer_qa_ArithmeticToken = function(stream,ruleset) {
+hxparse.Parser_qa_algebra_AlgebraLexer_qa_algebra_AlgebraToken = function(stream,ruleset) {
 	this.stream = stream;
 	this.ruleset = ruleset;
 };
-hxparse.Parser_qa_ArithmeticLexer_qa_ArithmeticToken.__name__ = ["hxparse","Parser_qa_ArithmeticLexer_qa_ArithmeticToken"];
-hxparse.Parser_qa_ArithmeticLexer_qa_ArithmeticToken.prototype = {
+hxparse.Parser_qa_algebra_AlgebraLexer_qa_algebra_AlgebraToken.__name__ = ["hxparse","Parser_qa_algebra_AlgebraLexer_qa_algebra_AlgebraToken"];
+hxparse.Parser_qa_algebra_AlgebraLexer_qa_algebra_AlgebraToken.prototype = {
 	ruleset: null
 	,last: null
 	,stream: null
@@ -1725,7 +1459,7 @@ hxparse.Parser_qa_ArithmeticLexer_qa_ArithmeticToken.prototype = {
 	,unexpected: function() {
 		throw new hxparse.Unexpected(this.peek(0),this.stream.curPos());
 	}
-	,__class__: hxparse.Parser_qa_ArithmeticLexer_qa_ArithmeticToken
+	,__class__: hxparse.Parser_qa_algebra_AlgebraLexer_qa_algebra_AlgebraToken
 };
 hxparse.Position = function(source,min,max) {
 	this.psource = source;
@@ -1970,254 +1704,132 @@ js.Boot.__cast = function(o,t) {
 	if(js.Boot.__instanceof(o,t)) return o; else throw "Cannot cast " + Std.string(o) + " to " + Std.string(t);
 };
 var qa = {};
-qa.ArithmeticBinop = { __ename__ : true, __constructs__ : ["OpAdd","OpSub","OpMul","OpDiv","OpPow"] };
-qa.ArithmeticBinop.OpAdd = ["OpAdd",0];
-qa.ArithmeticBinop.OpAdd.__enum__ = qa.ArithmeticBinop;
-qa.ArithmeticBinop.OpSub = ["OpSub",1];
-qa.ArithmeticBinop.OpSub.__enum__ = qa.ArithmeticBinop;
-qa.ArithmeticBinop.OpMul = ["OpMul",2];
-qa.ArithmeticBinop.OpMul.__enum__ = qa.ArithmeticBinop;
-qa.ArithmeticBinop.OpDiv = ["OpDiv",3];
-qa.ArithmeticBinop.OpDiv.__enum__ = qa.ArithmeticBinop;
-qa.ArithmeticBinop.OpPow = ["OpPow",4];
-qa.ArithmeticBinop.OpPow.__enum__ = qa.ArithmeticBinop;
-qa.NumberFormat = { __ename__ : true, __constructs__ : ["None","Decimal","Hexadecimal"] };
-qa.NumberFormat.None = ["None",0];
-qa.NumberFormat.None.__enum__ = qa.NumberFormat;
-qa.NumberFormat.Decimal = ["Decimal",1];
-qa.NumberFormat.Decimal.__enum__ = qa.NumberFormat;
-qa.NumberFormat.Hexadecimal = ["Hexadecimal",2];
-qa.NumberFormat.Hexadecimal.__enum__ = qa.NumberFormat;
-qa.Constant = { __ename__ : true, __constructs__ : ["CInteger","CRational","CReal"] };
-qa.Constant.CInteger = function(n,format) { var $x = ["CInteger",0,n,format]; $x.__enum__ = qa.Constant; return $x; };
-qa.Constant.CRational = function(n) { var $x = ["CRational",1,n]; $x.__enum__ = qa.Constant; return $x; };
-qa.Constant.CReal = function(n) { var $x = ["CReal",2,n]; $x.__enum__ = qa.Constant; return $x; };
-qa.ArithmeticError = function(type) {
-	this.type = type;
+qa.Ksi = function() {
+	this.lexer = new qa.algebra.AlgebraLexer();
+	this.parser = new qa.algebra.AlgebraParser(this.lexer,qa.algebra.AlgebraLexer.tok);
 };
-qa.ArithmeticError.__name__ = ["qa","ArithmeticError"];
-qa.ArithmeticError.prototype = {
-	type: null
-	,__class__: qa.ArithmeticError
-};
-qa.MathError = { __ename__ : true, __constructs__ : ["DivisionByZero","UnsupportedOperation","Overflow"] };
-qa.MathError.DivisionByZero = ["DivisionByZero",0];
-qa.MathError.DivisionByZero.__enum__ = qa.MathError;
-qa.MathError.UnsupportedOperation = function(msg) { var $x = ["UnsupportedOperation",1,msg]; $x.__enum__ = qa.MathError; return $x; };
-qa.MathError.Overflow = ["Overflow",2];
-qa.MathError.Overflow.__enum__ = qa.MathError;
-qa._Arithmetic = {};
-qa._Arithmetic.Real_Impl_ = function() { };
-qa._Arithmetic.Real_Impl_.__name__ = ["qa","_Arithmetic","Real_Impl_"];
-qa._Arithmetic.Real_Impl_.fromString = function(s) {
-	var n = Std.parseFloat(s);
-	if(Math.isNaN(n)) throw "Unable to convert from String to Float: " + s;
-	return js.Boot.__cast(n , Float);
-};
-qa._Arithmetic.Real_Impl_.toString = function(n) {
-	return "" + n;
-};
-qa._Arithmetic.Real_Impl_.negate = function(n) {
-	return -n;
-};
-qa._Arithmetic.Real_Impl_.abs = function(n) {
-	if(qa._Arithmetic.Real_Impl_.lessThan(n,0)) return -n; else return n;
-};
-qa._Arithmetic.Real_Impl_.pow = function(a,b) {
-	return Math.pow(a,b);
-};
-qa._Arithmetic.Real_Impl_.add = function(a,b) {
-	return a + b;
-};
-qa._Arithmetic.Real_Impl_.subtract = function(a,b) {
-	return a - b;
-};
-qa._Arithmetic.Real_Impl_.multiply = function(a,b) {
-	return a * b;
-};
-qa._Arithmetic.Real_Impl_.divide = function(a,b) {
-	return a / b;
-};
-qa._Arithmetic.Real_Impl_.greaterThan = function(a,b) {
-	return a > b;
-};
-qa._Arithmetic.Real_Impl_.lessThan = function(a,b) {
-	return a < b;
-};
-qa._Arithmetic.SimpleFraction_Impl_ = function() { };
-qa._Arithmetic.SimpleFraction_Impl_.__name__ = ["qa","_Arithmetic","SimpleFraction_Impl_"];
-qa._Arithmetic.SimpleFraction_Impl_.toReal = function(n) {
-	var v = n;
-	return qa._Arithmetic.Real_Impl_.divide(qa._Arithmetic.Integer_Impl_.toReal(v.a),qa._Arithmetic.Integer_Impl_.toReal(v.b));
-};
-qa._Arithmetic.SimpleFraction_Impl_.getNumerator = function(this1) {
-	return this1.a;
-};
-qa._Arithmetic.SimpleFraction_Impl_.getDenominator = function(this1) {
-	return this1.b;
-};
-qa._Arithmetic.SimpleFraction_Impl_.gcd = function(this1) {
-	var d = 0;
-	var r = 0;
-	var a;
-	var n = this1.a;
-	if(qa._Arithmetic.Integer_Impl_.lessThan(n,0)) a = -n; else a = n;
-	var b;
-	var n1 = this1.b;
-	if(qa._Arithmetic.Integer_Impl_.lessThan(n1,0)) b = -n1; else b = n1;
-	while(true) if(b == 0) {
-		d = a;
-		break;
-	} else {
-		r = a % b;
-		a = b;
-		b = r;
+qa.Ksi.__name__ = ["qa","Ksi"];
+qa.Ksi.prototype = {
+	lexer: null
+	,parser: null
+	,answer: function(text) {
+		var bytes = byte.js._ByteData.ByteData_Impl_.ofString(text);
+		var tokens = "";
+		this.lexer.reset(bytes);
+		var tok;
+		while((tok = this.lexer.token(qa.algebra.AlgebraLexer.tok)) != qa.algebra.AlgebraToken.TEof) tokens += Std.string(tok) + "<br/>";
+		this.lexer.reset(bytes);
+		this.parser.reset();
+		var expr = this.parser.parse();
+		var evalState = new qa.algebra.EvalState();
+		var answer = qa.algebra.AlgebraEvaluator["eval"](expr,evalState);
+		return { question : qa.algebra.AlgebraPrinter.printTex(expr), answer : "" + qa.algebra.AlgebraPrinter.printTex(answer), debug : "<h3>Evaluation steps</h3>" + "<div class='steps eval'>" + evalState.steps.map(qa.algebra.AlgebraPrinter.printEvalStep).join("\n") + "</div>" + Std.string(expr) + "<br/>" + "<div class='tokens'>" + tokens + "</div>" + "<h3>Parsing steps</h3>" + "<div class='steps parser'>" + this.parser.steps.join("<br/>") + "</div>"};
 	}
-	return d;
+	,__class__: qa.Ksi
 };
-qa._Arithmetic.SimpleFraction_Impl_.post = function(this1) {
-	qa._Arithmetic.SimpleFraction_Impl_.simplify(this1);
-};
-qa._Arithmetic.SimpleFraction_Impl_.simplify = function(this1) {
-	qa._Arithmetic.SimpleFraction_Impl_.reduce(this1);
-	var v = this1;
-	if(qa._Arithmetic.Integer_Impl_.lessThan(v.a,0) && qa._Arithmetic.Integer_Impl_.lessThan(v.b,0)) {
-		v.a = -v.a;
-		v.b = -v.b;
+qa.algebra = {};
+qa.algebra.MathExpression = { __ename__ : true, __constructs__ : ["ESymbol","EBinop","EParenthesis","ENeg"] };
+qa.algebra.MathExpression.ESymbol = function(c) { var $x = ["ESymbol",0,c]; $x.__enum__ = qa.algebra.MathExpression; $x.toString = $estr; return $x; };
+qa.algebra.MathExpression.EBinop = function(op,e1,e2) { var $x = ["EBinop",1,op,e1,e2]; $x.__enum__ = qa.algebra.MathExpression; $x.toString = $estr; return $x; };
+qa.algebra.MathExpression.EParenthesis = function(e) { var $x = ["EParenthesis",2,e]; $x.__enum__ = qa.algebra.MathExpression; $x.toString = $estr; return $x; };
+qa.algebra.MathExpression.ENeg = function(e) { var $x = ["ENeg",3,e]; $x.__enum__ = qa.algebra.MathExpression; $x.toString = $estr; return $x; };
+qa.algebra.Algebra = function() { };
+qa.algebra.Algebra.__name__ = ["qa","algebra","Algebra"];
+qa.algebra.Algebra.getPrecedenceRank = function(op) {
+	switch(op[1]) {
+	case 0:
+		return 0;
+	case 1:
+		return 1;
+	case 2:case 3:
+		return 2;
+	case 4:
+		return 3;
 	}
 };
-qa._Arithmetic.SimpleFraction_Impl_.reduce = function(this1) {
-	var d = qa._Arithmetic.SimpleFraction_Impl_.gcd(this1);
-	var v = this1;
-	v.a = Math.floor(v.a / d);
-	v.b = Math.floor(v.b / d);
+qa.algebra.Algebra.getConstantRank = function(c) {
+	switch(c[1]) {
+	case 0:
+		return 0;
+	case 1:
+		return 1;
+	case 2:
+		return 2;
+	}
 };
-qa._Arithmetic.SimpleFraction_Impl_.pow = function(a,b) {
-	var va = a;
-	var vb = b;
-	if(vb.b != 1) throw new qa.ArithmeticError(qa.MathError.UnsupportedOperation("Fractional powers not supported"));
-	var r = { a : (function($this) {
-		var $r;
-		var f = Math.pow(va.a,vb.a);
-		if(!Math.isFinite(f)) throw new qa.ArithmeticError(qa.MathError.Overflow);
-		$r = Math.floor(f);
-		return $r;
-	}(this)), b : (function($this) {
-		var $r;
-		var f1 = Math.pow(va.b,vb.a);
-		if(!Math.isFinite(f1)) throw new qa.ArithmeticError(qa.MathError.Overflow);
-		$r = Math.floor(f1);
-		return $r;
-	}(this))};
-	qa._Arithmetic.SimpleFraction_Impl_.post(r);
-	return r;
+qa.algebra.Algebra.changeRank = function(c,base,state) {
+	var rb = qa.algebra.Algebra.getConstantRank(base);
+	var rc = qa.algebra.Algebra.getConstantRank(c);
+	while(rc != rb) {
+		if(rc < rb) {
+			var p = qa.algebra.Algebra.promoteConst(c);
+			state.addStep(qa.algebra.EvalStepType.Promote(c,p));
+			c = p;
+		} else throw "Constant demotion not supported";
+		var nrc = qa.algebra.Algebra.getConstantRank(c);
+		if(nrc == rc) throw "Constant rank change error " + Std.string(c) + "(" + rc + " == " + nrc + ") " + Std.string(base) + "(" + rb + ")";
+		rc = nrc;
+	}
+	return c;
 };
-qa._Arithmetic.SimpleFraction_Impl_.negate = function(n) {
-	return qa._Arithmetic.SimpleFraction_Impl_.subtract(qa._Arithmetic.SimpleFraction_Impl_.ZERO,n);
+qa.algebra.Algebra.promoteConst = function(c) {
+	switch(c[1]) {
+	case 0:
+		var n = c[2];
+		return qa.algebra.Constant.CRational(qa.arithmetic._Arithmetic.Integer_Impl_.toSimpleFraction(n));
+	case 1:
+		var n1 = c[2];
+		return qa.algebra.Constant.CReal(qa.arithmetic._Arithmetic.SimpleFraction_Impl_.toReal(n1));
+	default:
+		throw "Unimplemented rank promotion for " + Std.string(c);
+	}
 };
-qa._Arithmetic.SimpleFraction_Impl_.add = function(a,b) {
-	var va = a;
-	var vb = b;
-	var r = { a : qa._Arithmetic.Integer_Impl_.add(qa._Arithmetic.Integer_Impl_.multiply(va.a,vb.b),qa._Arithmetic.Integer_Impl_.multiply(vb.a,va.b)), b : qa._Arithmetic.Integer_Impl_.multiply(va.b,vb.b)};
-	qa._Arithmetic.SimpleFraction_Impl_.post(r);
-	return r;
+qa.algebra.Constant = { __ename__ : true, __constructs__ : ["CInteger","CRational","CReal"] };
+qa.algebra.Constant.CInteger = function(n,format) { var $x = ["CInteger",0,n,format]; $x.__enum__ = qa.algebra.Constant; $x.toString = $estr; return $x; };
+qa.algebra.Constant.CRational = function(n) { var $x = ["CRational",1,n]; $x.__enum__ = qa.algebra.Constant; $x.toString = $estr; return $x; };
+qa.algebra.Constant.CReal = function(n) { var $x = ["CReal",2,n]; $x.__enum__ = qa.algebra.Constant; $x.toString = $estr; return $x; };
+qa.algebra.Symbol = { __ename__ : true, __constructs__ : ["SConst","SVariable"] };
+qa.algebra.Symbol.SConst = function(c) { var $x = ["SConst",0,c]; $x.__enum__ = qa.algebra.Symbol; $x.toString = $estr; return $x; };
+qa.algebra.Symbol.SVariable = function(name) { var $x = ["SVariable",1,name]; $x.__enum__ = qa.algebra.Symbol; $x.toString = $estr; return $x; };
+qa.algebra.AlgebraBinop = { __ename__ : true, __constructs__ : ["OpAdd","OpSub","OpMul","OpDiv","OpPow"] };
+qa.algebra.AlgebraBinop.OpAdd = ["OpAdd",0];
+qa.algebra.AlgebraBinop.OpAdd.toString = $estr;
+qa.algebra.AlgebraBinop.OpAdd.__enum__ = qa.algebra.AlgebraBinop;
+qa.algebra.AlgebraBinop.OpSub = ["OpSub",1];
+qa.algebra.AlgebraBinop.OpSub.toString = $estr;
+qa.algebra.AlgebraBinop.OpSub.__enum__ = qa.algebra.AlgebraBinop;
+qa.algebra.AlgebraBinop.OpMul = ["OpMul",2];
+qa.algebra.AlgebraBinop.OpMul.toString = $estr;
+qa.algebra.AlgebraBinop.OpMul.__enum__ = qa.algebra.AlgebraBinop;
+qa.algebra.AlgebraBinop.OpDiv = ["OpDiv",3];
+qa.algebra.AlgebraBinop.OpDiv.toString = $estr;
+qa.algebra.AlgebraBinop.OpDiv.__enum__ = qa.algebra.AlgebraBinop;
+qa.algebra.AlgebraBinop.OpPow = ["OpPow",4];
+qa.algebra.AlgebraBinop.OpPow.toString = $estr;
+qa.algebra.AlgebraBinop.OpPow.__enum__ = qa.algebra.AlgebraBinop;
+qa.algebra.AlgebraPrinter = function() { };
+qa.algebra.AlgebraPrinter.__name__ = ["qa","algebra","AlgebraPrinter"];
+qa.algebra.AlgebraPrinter.getTag = function(s) {
+	var tagName = StringTools.replace(s," ","-");
+	return "<span class=\"tag tag-" + tagName + "\">" + s + "</span>";
 };
-qa._Arithmetic.SimpleFraction_Impl_.subtract = function(a,b) {
-	var va = a;
-	var vb = b;
-	var r = { a : qa._Arithmetic.Integer_Impl_.subtract(qa._Arithmetic.Integer_Impl_.multiply(va.a,vb.b),qa._Arithmetic.Integer_Impl_.multiply(vb.a,va.b)), b : qa._Arithmetic.Integer_Impl_.multiply(va.b,vb.b)};
-	qa._Arithmetic.SimpleFraction_Impl_.post(r);
-	return r;
-};
-qa._Arithmetic.SimpleFraction_Impl_.multiply = function(a,b) {
-	var va = a;
-	var vb = b;
-	var r = { a : qa._Arithmetic.Integer_Impl_.multiply(va.a,vb.a), b : qa._Arithmetic.Integer_Impl_.multiply(va.b,vb.b)};
-	qa._Arithmetic.SimpleFraction_Impl_.post(r);
-	return r;
-};
-qa._Arithmetic.SimpleFraction_Impl_.divide = function(a,b) {
-	var va = a;
-	var vb = b;
-	if(qa._Arithmetic.Integer_Impl_.toSimpleFraction(vb.a) == qa._Arithmetic.SimpleFraction_Impl_.ZERO) throw new qa.ArithmeticError(qa.MathError.DivisionByZero);
-	var r = { a : qa._Arithmetic.Integer_Impl_.multiply(va.a,vb.b), b : qa._Arithmetic.Integer_Impl_.multiply(va.b,vb.a)};
-	qa._Arithmetic.SimpleFraction_Impl_.post(r);
-	return r;
-};
-qa._Arithmetic.Integer_Impl_ = function() { };
-qa._Arithmetic.Integer_Impl_.__name__ = ["qa","_Arithmetic","Integer_Impl_"];
-qa._Arithmetic.Integer_Impl_.fromString = function(s) {
-	var n = Std.parseInt(s);
-	if(n == null) throw "Unable to convert from String to Integer: " + s;
-	var t = n;
-	return js.Boot.__cast(t , Int);
-};
-qa._Arithmetic.Integer_Impl_.toString = function(n) {
-	return "" + n;
-};
-qa._Arithmetic.Integer_Impl_.toSimpleFraction = function(n) {
-	return { a : n, b : 1};
-};
-qa._Arithmetic.Integer_Impl_.negate = function(n) {
-	return -n;
-};
-qa._Arithmetic.Integer_Impl_.abs = function(n) {
-	if(qa._Arithmetic.Integer_Impl_.lessThan(n,0)) return -n; else return n;
-};
-qa._Arithmetic.Integer_Impl_.divideInteger = function(a,b) {
-	return Math.floor(a / b);
-};
-qa._Arithmetic.Integer_Impl_.pow = function(a,b) {
-	var f = Math.pow(a,b);
-	if(!Math.isFinite(f)) throw new qa.ArithmeticError(qa.MathError.Overflow);
-	return Math.floor(f);
-};
-qa._Arithmetic.Integer_Impl_.toReal = function(n) {
-	return n;
-};
-qa._Arithmetic.Integer_Impl_.add = function(a,b) {
-	return a + b;
-};
-qa._Arithmetic.Integer_Impl_.subtract = function(a,b) {
-	return a - b;
-};
-qa._Arithmetic.Integer_Impl_.multiply = function(a,b) {
-	return a * b;
-};
-qa._Arithmetic.Integer_Impl_.divide = function(a,b) {
-	return { a : a, b : b};
-};
-qa._Arithmetic.Integer_Impl_.greaterThan = function(a,b) {
-	return a > b;
-};
-qa._Arithmetic.Integer_Impl_.lessThan = function(a,b) {
-	return a < b;
-};
-qa.ArithmeticToken = { __ename__ : true, __constructs__ : ["TConst","TPOpen","TPClose","TBinop","TEof"] };
-qa.ArithmeticToken.TConst = function(c) { var $x = ["TConst",0,c]; $x.__enum__ = qa.ArithmeticToken; return $x; };
-qa.ArithmeticToken.TPOpen = ["TPOpen",1];
-qa.ArithmeticToken.TPOpen.__enum__ = qa.ArithmeticToken;
-qa.ArithmeticToken.TPClose = ["TPClose",2];
-qa.ArithmeticToken.TPClose.__enum__ = qa.ArithmeticToken;
-qa.ArithmeticToken.TBinop = function(op) { var $x = ["TBinop",3,op]; $x.__enum__ = qa.ArithmeticToken; return $x; };
-qa.ArithmeticToken.TEof = ["TEof",4];
-qa.ArithmeticToken.TEof.__enum__ = qa.ArithmeticToken;
-qa.ArithmeticExpr = { __ename__ : true, __constructs__ : ["EConst","EBinop","EParenthesis","ENeg"] };
-qa.ArithmeticExpr.EConst = function(c) { var $x = ["EConst",0,c]; $x.__enum__ = qa.ArithmeticExpr; return $x; };
-qa.ArithmeticExpr.EBinop = function(op,e1,e2) { var $x = ["EBinop",1,op,e1,e2]; $x.__enum__ = qa.ArithmeticExpr; return $x; };
-qa.ArithmeticExpr.EParenthesis = function(e) { var $x = ["EParenthesis",2,e]; $x.__enum__ = qa.ArithmeticExpr; return $x; };
-qa.ArithmeticExpr.ENeg = function(e) { var $x = ["ENeg",3,e]; $x.__enum__ = qa.ArithmeticExpr; return $x; };
-qa.ArithmeticPrinter = function() { };
-qa.ArithmeticPrinter.__name__ = ["qa","ArithmeticPrinter"];
-qa.ArithmeticPrinter.getTag = function(s) {
-	return "<span class=\"tag tag-" + s + "\">" + s + "</span>";
-};
-qa.ArithmeticPrinter.getExpressionTag = function(e) {
-	return qa.ArithmeticPrinter.getTag((function($this) {
+qa.algebra.AlgebraPrinter.getExpressionTag = function(e) {
+	return qa.algebra.AlgebraPrinter.getTag((function($this) {
 		var $r;
 		switch(e[1]) {
 		case 0:
-			$r = "const";
+			$r = (function($this) {
+				var $r;
+				switch(e[2][1]) {
+				case 0:
+					$r = "const";
+					break;
+				case 1:
+					$r = "var";
+					break;
+				}
+				return $r;
+			}($this));
 			break;
 		case 1:
 			$r = "binop";
@@ -2232,7 +1844,7 @@ qa.ArithmeticPrinter.getExpressionTag = function(e) {
 		return $r;
 	}(this)));
 };
-qa.ArithmeticPrinter.printEvalStep = function(step) {
+qa.algebra.AlgebraPrinter.printEvalStep = function(step) {
 	var type;
 	{
 		var _g = step.type;
@@ -2240,21 +1852,29 @@ qa.ArithmeticPrinter.printEvalStep = function(step) {
 		case 2:
 			var p = _g[3];
 			var c = _g[2];
-			type = qa.ArithmeticPrinter.getTag("promoted") + ("" + qa.ArithmeticPrinter.printConstant(c) + " to " + qa.ArithmeticPrinter.printConstant(p));
+			type = qa.algebra.AlgebraPrinter.getTag("promoted") + ("" + qa.algebra.AlgebraPrinter.printConstant(c) + " to " + qa.algebra.AlgebraPrinter.printConstant(p));
 			break;
 		case 0:
 			var e = _g[2];
 			var expr;
 			switch(e[1]) {
 			case 0:
-				var c1 = e[2];
-				expr = qa.ArithmeticPrinter.printConstant(c1);
+				switch(e[2][1]) {
+				case 0:
+					var c1 = e[2][2];
+					expr = qa.algebra.AlgebraPrinter.printConstant(c1);
+					break;
+				case 1:
+					var name = e[2][2];
+					expr = name;
+					break;
+				}
 				break;
 			case 1:
 				var e2 = e[4];
 				var e1 = e[3];
 				var c2 = e[2];
-				expr = qa.ArithmeticPrinter.printTexInline(e);
+				expr = qa.algebra.AlgebraPrinter.wrapTexInline(qa.algebra.AlgebraPrinter.printTexMath(e,true));
 				break;
 			case 2:
 				var e3 = e[2];
@@ -2262,20 +1882,24 @@ qa.ArithmeticPrinter.printEvalStep = function(step) {
 				break;
 			case 3:
 				var e4 = e[2];
-				expr = qa.ArithmeticPrinter.printTexInline(e4);
+				expr = qa.algebra.AlgebraPrinter.printTexInline(e4);
 				break;
 			}
-			type = qa.ArithmeticPrinter.getExpressionTag(e) + expr;
+			type = qa.algebra.AlgebraPrinter.getExpressionTag(e) + expr;
 			break;
 		case 1:
-			var c3 = _g[2];
-			type = qa.ArithmeticPrinter.getTag("result") + " \\(\\rightarrow\\) " + qa.ArithmeticPrinter.printConstant(c3);
+			var e5 = _g[2];
+			type = qa.algebra.AlgebraPrinter.getTag("result") + " \\(\\rightarrow\\) " + qa.algebra.AlgebraPrinter.getExpressionTag(e5) + qa.algebra.AlgebraPrinter.wrapTexInline(qa.algebra.AlgebraPrinter.printTexMath(e5,true));
+			break;
+		case 3:
+			var s = _g[2];
+			type = qa.algebra.AlgebraPrinter.getTag("unknown symbol") + qa.algebra.AlgebraPrinter.printTexInline(qa.algebra.MathExpression.ESymbol(s));
 			break;
 		}
 	}
 	return "<div class=\"step\" style=\"margin-left: " + step.level + "em;\">" + type + "</div>";
 };
-qa.ArithmeticPrinter.printConstant = function(c) {
+qa.algebra.AlgebraPrinter.printConstant = function(c) {
 	var type;
 	switch(c[1]) {
 	case 0:
@@ -2288,82 +1912,683 @@ qa.ArithmeticPrinter.printConstant = function(c) {
 		type = "real";
 		break;
 	}
-	return "" + type + " \\(" + qa.ArithmeticPrinter.printTexMath(qa.ArithmeticExpr.EConst(c)) + "\\)";
+	return "" + type + " \\(" + qa.algebra.AlgebraPrinter.printTexMath(qa.algebra.MathExpression.ESymbol(qa.algebra.Symbol.SConst(c))) + "\\)";
 };
-qa.ArithmeticPrinter.printTex = function(expr) {
-	return "$$" + qa.ArithmeticPrinter.printTexMath(expr) + "$$";
+qa.algebra.AlgebraPrinter.printTex = function(expr) {
+	return "$$" + qa.algebra.AlgebraPrinter.printTexMath(expr) + "$$";
 };
-qa.ArithmeticPrinter.printTexInline = function(expr) {
-	return "\\(" + qa.ArithmeticPrinter.printTexMath(expr) + "\\)";
+qa.algebra.AlgebraPrinter.printTexInline = function(expr) {
+	return qa.algebra.AlgebraPrinter.wrapTexInline(qa.algebra.AlgebraPrinter.printTexMath(expr));
 };
-qa.ArithmeticPrinter.printTexMath = function(expr) {
+qa.algebra.AlgebraPrinter.wrapTexInline = function(tex) {
+	return "\\(" + tex + "\\)";
+};
+qa.algebra.AlgebraPrinter.highlight = function(s) {
+	return "\\color{darkorange}{" + s + "}";
+};
+qa.algebra.AlgebraPrinter.printTexMath = function(expr,highlightBinop) {
+	if(highlightBinop == null) highlightBinop = false;
 	switch(expr[1]) {
 	case 0:
-		var c = expr[2];
-		switch(c[1]) {
+		switch(expr[2][1]) {
 		case 0:
-			var format = c[3];
-			var n = c[2];
-			switch(format[1]) {
-			case 1:case 0:
-				return qa._Arithmetic.Integer_Impl_.toString(qa._Arithmetic.Integer_Impl_.add("",n));
+			var c = expr[2][2];
+			switch(c[1]) {
+			case 0:
+				var format = c[3];
+				var n = c[2];
+				switch(format[1]) {
+				case 1:case 0:
+					return qa.arithmetic._Arithmetic.Integer_Impl_.toString(qa.arithmetic._Arithmetic.Integer_Impl_.add("",n));
+				case 2:
+					return "\\mathtt{" + StringTools.hex(n,0) + "}_{16}";
+				}
+				break;
+			case 1:
+				var n1 = c[2];
+				return "\\left(\\frac{" + qa.arithmetic._Arithmetic.Integer_Impl_.toString(qa.arithmetic._Arithmetic.SimpleFraction_Impl_.getNumerator(n1)) + "}{" + qa.arithmetic._Arithmetic.Integer_Impl_.toString(qa.arithmetic._Arithmetic.SimpleFraction_Impl_.getDenominator(n1)) + "}\\right)";
 			case 2:
-				return "\\mathtt{" + StringTools.hex(n,0) + "}_{16}";
+				var n2 = c[2];
+				return "" + qa.arithmetic._Arithmetic.Real_Impl_.toString(n2);
 			}
 			break;
 		case 1:
-			var n1 = c[2];
-			return "\\left(\\frac{" + qa._Arithmetic.Integer_Impl_.toString(qa._Arithmetic.SimpleFraction_Impl_.getNumerator(n1)) + "}{" + qa._Arithmetic.Integer_Impl_.toString(qa._Arithmetic.SimpleFraction_Impl_.getDenominator(n1)) + "}\\right)";
-		case 2:
-			var n2 = c[2];
-			return "" + qa._Arithmetic.Real_Impl_.toString(n2);
+			var name = expr[2][2];
+			return "\\mathtt{" + name + "}";
 		}
 		break;
 	case 1:
 		var e2 = expr[4];
 		var e1 = expr[3];
 		var op = expr[2];
-		var p1 = qa.ArithmeticPrinter.printTexMath(e1);
-		var p2 = qa.ArithmeticPrinter.printTexMath(e2);
+		var p1 = qa.algebra.AlgebraPrinter.printTexMath(qa.algebra.AlgebraPrinter.wrapParens(e1,op));
+		var p2 = qa.algebra.AlgebraPrinter.printTexMath(qa.algebra.AlgebraPrinter.wrapParens(e2,op));
 		switch(op[1]) {
 		case 0:
-			return "" + p1 + " + " + p2;
+			return "" + p1 + " " + (highlightBinop?qa.algebra.AlgebraPrinter.highlight("+"):"+") + (" " + p2);
 		case 1:
-			return "" + p1 + " - " + p2;
+			return "" + p1 + " " + (highlightBinop?qa.algebra.AlgebraPrinter.highlight("-"):"-") + (" " + p2);
 		case 2:
-			return "" + p1 + " \\times " + p2;
+			return "" + p1 + " " + (highlightBinop?qa.algebra.AlgebraPrinter.highlight("\\times"):"\\times") + (" " + p2);
 		case 4:
 			return "" + p1 + "^{" + p2 + "}";
 		case 3:
-			p1 = qa.ArithmeticPrinter.printTexMath(qa.ArithmeticPrinter.escapeParens(e1));
-			p2 = qa.ArithmeticPrinter.printTexMath(qa.ArithmeticPrinter.escapeParens(e2));
+			p1 = qa.algebra.AlgebraPrinter.printTexMath(e1);
+			p2 = qa.algebra.AlgebraPrinter.printTexMath(e2);
 			return "\\frac{" + p1 + "}{" + p2 + "}";
 		}
 		break;
 	case 2:
 		var e = expr[2];
-		return "\\left(" + qa.ArithmeticPrinter.printTexMath(e) + "\\right)";
+		return "\\left(" + qa.algebra.AlgebraPrinter.printTexMath(e) + "\\right)";
 	case 3:
 		var e3 = expr[2];
-		return "-" + qa.ArithmeticPrinter.printTexMath(e3);
+		return "-" + qa.algebra.AlgebraPrinter.printTexMath(e3);
 	}
 };
-qa.ArithmeticPrinter.escapeParens = function(expr) {
+qa.algebra.AlgebraPrinter.wrapParens = function(e,pop) {
+	e = qa.algebra.AlgebraPrinter.escapeParens(e);
+	switch(e[1]) {
+	case 1:
+		var e2 = e[4];
+		var e1 = e[3];
+		var op = e[2];
+		if(qa.algebra.Algebra.getPrecedenceRank(pop) > qa.algebra.Algebra.getPrecedenceRank(op)) return qa.algebra.MathExpression.EParenthesis(e); else return e;
+		break;
+	case 0:
+		switch(e[2][1]) {
+		case 0:
+			return e;
+		default:
+			return qa.algebra.MathExpression.EParenthesis(e);
+		}
+		break;
+	default:
+		return qa.algebra.MathExpression.EParenthesis(e);
+	}
+};
+qa.algebra.AlgebraPrinter.escapeParens = function(expr) {
 	switch(expr[1]) {
 	case 2:
 		var e = expr[2];
-		return qa.ArithmeticPrinter.escapeParens(e);
+		return qa.algebra.AlgebraPrinter.escapeParens(e);
 	default:
 		return expr;
 	}
 };
-qa.ArithmeticLexer = function() {
+qa.algebra.EvalStepType = { __ename__ : true, __constructs__ : ["Expression","Result","Promote","UnknownSymbol"] };
+qa.algebra.EvalStepType.Expression = function(e) { var $x = ["Expression",0,e]; $x.__enum__ = qa.algebra.EvalStepType; $x.toString = $estr; return $x; };
+qa.algebra.EvalStepType.Result = function(c) { var $x = ["Result",1,c]; $x.__enum__ = qa.algebra.EvalStepType; $x.toString = $estr; return $x; };
+qa.algebra.EvalStepType.Promote = function(c,p) { var $x = ["Promote",2,c,p]; $x.__enum__ = qa.algebra.EvalStepType; $x.toString = $estr; return $x; };
+qa.algebra.EvalStepType.UnknownSymbol = function(s) { var $x = ["UnknownSymbol",3,s]; $x.__enum__ = qa.algebra.EvalStepType; $x.toString = $estr; return $x; };
+qa.algebra.EvalState = function() {
+	this.steps = new List();
+};
+qa.algebra.EvalState.__name__ = ["qa","algebra","EvalState"];
+qa.algebra.EvalState.prototype = {
+	currentLevel: null
+	,steps: null
+	,addStep: function(type) {
+		this.steps.add({ type : type, level : this.currentLevel});
+	}
+	,__class__: qa.algebra.EvalState
+};
+qa.algebra.AlgebraEvaluator = function() { };
+qa.algebra.AlgebraEvaluator.__name__ = ["qa","algebra","AlgebraEvaluator"];
+qa.algebra.AlgebraEvaluator.evalConst = function(e,state) {
+	var result = qa.algebra.AlgebraEvaluator["eval"](e,state);
+};
+qa.algebra.AlgebraEvaluator["eval"] = function(e,state) {
+	state.currentLevel++;
+	switch(e[1]) {
+	case 0:case 2:
+		break;
+	default:
+		state.addStep(qa.algebra.EvalStepType.Expression(e));
+	}
+	var result;
+	switch(e[1]) {
+	case 0:
+		var v = e[2];
+		switch(e[2][1]) {
+		case 0:
+			var c = e[2][2];
+			result = e;
+			break;
+		case 1:
+			state.addStep(qa.algebra.EvalStepType.UnknownSymbol(v));
+			result = e;
+			break;
+		}
+		break;
+	case 1:
+		var e2 = e[4];
+		var e1 = e[3];
+		var op = e[2];
+		switch(e1[1]) {
+		case 0:
+			switch(e1[2][1]) {
+			case 0:
+				switch(e2[1]) {
+				case 0:
+					switch(e2[2][1]) {
+					case 0:
+						var ca = e1[2][2];
+						var cb = e2[2][2];
+						{
+							var a = ca;
+							switch(ca[1]) {
+							case 0:
+								var b = cb;
+								switch(cb[1]) {
+								case 0:
+									var a1 = ca[2];
+									var opa = ca[3];
+									var opb = cb[3];
+									var b1 = cb[2];
+									var format;
+									switch(opa[1]) {
+									case 2:
+										switch(opb[1]) {
+										case 2:
+											format = qa.arithmetic.NumberFormat.Hexadecimal;
+											break;
+										case 1:
+											format = qa.arithmetic.NumberFormat.Decimal;
+											break;
+										default:
+											format = qa.arithmetic.NumberFormat.None;
+										}
+										break;
+									case 1:
+										switch(opb[1]) {
+										case 2:case 1:
+											format = qa.arithmetic.NumberFormat.Decimal;
+											break;
+										default:
+											format = qa.arithmetic.NumberFormat.None;
+										}
+										break;
+									default:
+										format = qa.arithmetic.NumberFormat.None;
+									}
+									result = qa.algebra.MathExpression.ESymbol(qa.algebra.Symbol.SConst((function($this) {
+										var $r;
+										switch(op[1]) {
+										case 0:
+											$r = qa.algebra.Constant.CInteger(qa.arithmetic._Arithmetic.Integer_Impl_.add(a1,b1),format);
+											break;
+										case 1:
+											$r = qa.algebra.Constant.CInteger(qa.arithmetic._Arithmetic.Integer_Impl_.subtract(a1,b1),format);
+											break;
+										case 2:
+											$r = qa.algebra.Constant.CInteger(qa.arithmetic._Arithmetic.Integer_Impl_.multiply(a1,b1),format);
+											break;
+										case 3:
+											$r = qa.algebra.Constant.CRational(qa.arithmetic._Arithmetic.Integer_Impl_.divide(a1,b1));
+											break;
+										case 4:
+											$r = qa.algebra.Constant.CInteger((function($this) {
+												var $r;
+												var f = Math.pow(a1,b1);
+												if(!Math.isFinite(f)) throw new qa.arithmetic.ArithmeticError(qa.arithmetic.ArithmeticErrorType.Overflow);
+												$r = Math.floor(f);
+												return $r;
+											}($this)),qa.arithmetic.NumberFormat.None);
+											break;
+										}
+										return $r;
+									}(this))));
+									break;
+								default:
+									var ra = qa.algebra.Algebra.getConstantRank(a);
+									var rb = qa.algebra.Algebra.getConstantRank(b);
+									if(ra == rb) throw "Unimplemented binop " + Std.string(op) + " " + Std.string(e1) + " " + Std.string(e2);
+									result = qa.algebra.AlgebraEvaluator["eval"](rb > ra?qa.algebra.MathExpression.EBinop(op,qa.algebra.MathExpression.ESymbol(qa.algebra.Symbol.SConst(qa.algebra.Algebra.changeRank(a,b,state))),e2):qa.algebra.MathExpression.EBinop(op,e1,qa.algebra.MathExpression.ESymbol(qa.algebra.Symbol.SConst(qa.algebra.Algebra.changeRank(b,a,state)))),state);
+								}
+								break;
+							case 1:
+								var b = cb;
+								switch(cb[1]) {
+								case 1:
+									var a2 = ca[2];
+									var b2 = cb[2];
+									result = qa.algebra.MathExpression.ESymbol(qa.algebra.Symbol.SConst((function($this) {
+										var $r;
+										switch(op[1]) {
+										case 0:
+											$r = qa.algebra.Constant.CRational(qa.arithmetic._Arithmetic.SimpleFraction_Impl_.add(a2,b2));
+											break;
+										case 1:
+											$r = qa.algebra.Constant.CRational(qa.arithmetic._Arithmetic.SimpleFraction_Impl_.subtract(a2,b2));
+											break;
+										case 2:
+											$r = qa.algebra.Constant.CRational(qa.arithmetic._Arithmetic.SimpleFraction_Impl_.multiply(a2,b2));
+											break;
+										case 3:
+											$r = qa.algebra.Constant.CRational(qa.arithmetic._Arithmetic.SimpleFraction_Impl_.divide(a2,b2));
+											break;
+										case 4:
+											$r = qa.algebra.Constant.CRational((function($this) {
+												var $r;
+												var va = a2;
+												var vb = b2;
+												if(vb.b != 1) throw new qa.arithmetic.ArithmeticError(qa.arithmetic.ArithmeticErrorType.UnsupportedOperation("Fractional powers not supported"));
+												var r = { a : (function($this) {
+													var $r;
+													var f1 = Math.pow(va.a,vb.a);
+													if(!Math.isFinite(f1)) throw new qa.arithmetic.ArithmeticError(qa.arithmetic.ArithmeticErrorType.Overflow);
+													$r = Math.floor(f1);
+													return $r;
+												}($this)), b : (function($this) {
+													var $r;
+													var f11 = Math.pow(va.b,vb.a);
+													if(!Math.isFinite(f11)) throw new qa.arithmetic.ArithmeticError(qa.arithmetic.ArithmeticErrorType.Overflow);
+													$r = Math.floor(f11);
+													return $r;
+												}($this))};
+												qa.arithmetic._Arithmetic.SimpleFraction_Impl_.post(r);
+												$r = r;
+												return $r;
+											}($this)));
+											break;
+										}
+										return $r;
+									}(this))));
+									break;
+								default:
+									var ra = qa.algebra.Algebra.getConstantRank(a);
+									var rb = qa.algebra.Algebra.getConstantRank(b);
+									if(ra == rb) throw "Unimplemented binop " + Std.string(op) + " " + Std.string(e1) + " " + Std.string(e2);
+									result = qa.algebra.AlgebraEvaluator["eval"](rb > ra?qa.algebra.MathExpression.EBinop(op,qa.algebra.MathExpression.ESymbol(qa.algebra.Symbol.SConst(qa.algebra.Algebra.changeRank(a,b,state))),e2):qa.algebra.MathExpression.EBinop(op,e1,qa.algebra.MathExpression.ESymbol(qa.algebra.Symbol.SConst(qa.algebra.Algebra.changeRank(b,a,state)))),state);
+								}
+								break;
+							case 2:
+								var b = cb;
+								switch(cb[1]) {
+								case 2:
+									var a3 = ca[2];
+									var b3 = cb[2];
+									result = qa.algebra.MathExpression.ESymbol(qa.algebra.Symbol.SConst((function($this) {
+										var $r;
+										switch(op[1]) {
+										case 0:
+											$r = qa.algebra.Constant.CReal(qa.arithmetic._Arithmetic.Real_Impl_.add(a3,b3));
+											break;
+										case 1:
+											$r = qa.algebra.Constant.CReal(qa.arithmetic._Arithmetic.Real_Impl_.subtract(a3,b3));
+											break;
+										case 2:
+											$r = qa.algebra.Constant.CReal(qa.arithmetic._Arithmetic.Real_Impl_.multiply(a3,b3));
+											break;
+										case 3:
+											$r = qa.algebra.Constant.CReal(qa.arithmetic._Arithmetic.Real_Impl_.divide(a3,b3));
+											break;
+										case 4:
+											$r = qa.algebra.Constant.CReal(Math.pow(a3,b3));
+											break;
+										}
+										return $r;
+									}(this))));
+									break;
+								default:
+									var ra = qa.algebra.Algebra.getConstantRank(a);
+									var rb = qa.algebra.Algebra.getConstantRank(b);
+									if(ra == rb) throw "Unimplemented binop " + Std.string(op) + " " + Std.string(e1) + " " + Std.string(e2);
+									result = qa.algebra.AlgebraEvaluator["eval"](rb > ra?qa.algebra.MathExpression.EBinop(op,qa.algebra.MathExpression.ESymbol(qa.algebra.Symbol.SConst(qa.algebra.Algebra.changeRank(a,b,state))),e2):qa.algebra.MathExpression.EBinop(op,e1,qa.algebra.MathExpression.ESymbol(qa.algebra.Symbol.SConst(qa.algebra.Algebra.changeRank(b,a,state)))),state);
+								}
+								break;
+							}
+						}
+						break;
+					default:
+						var ev1 = qa.algebra.AlgebraEvaluator["eval"](e1,state);
+						var ev2 = qa.algebra.AlgebraEvaluator["eval"](e2,state);
+						switch(ev1[1]) {
+						case 0:
+							switch(ev1[2][1]) {
+							case 0:
+								switch(ev2[1]) {
+								case 0:
+									switch(ev2[2][1]) {
+									case 0:
+										var a4 = ev1[2][2];
+										var b4 = ev2[2][2];
+										result = qa.algebra.AlgebraEvaluator["eval"](qa.algebra.MathExpression.EBinop(op,ev1,ev2),state);
+										break;
+									default:
+										result = qa.algebra.MathExpression.EBinop(op,ev1,ev2);
+									}
+									break;
+								default:
+									result = qa.algebra.MathExpression.EBinop(op,ev1,ev2);
+								}
+								break;
+							default:
+								result = qa.algebra.MathExpression.EBinop(op,ev1,ev2);
+							}
+							break;
+						default:
+							result = qa.algebra.MathExpression.EBinop(op,ev1,ev2);
+						}
+					}
+					break;
+				default:
+					var ev1 = qa.algebra.AlgebraEvaluator["eval"](e1,state);
+					var ev2 = qa.algebra.AlgebraEvaluator["eval"](e2,state);
+					switch(ev1[1]) {
+					case 0:
+						switch(ev1[2][1]) {
+						case 0:
+							switch(ev2[1]) {
+							case 0:
+								switch(ev2[2][1]) {
+								case 0:
+									var a4 = ev1[2][2];
+									var b4 = ev2[2][2];
+									result = qa.algebra.AlgebraEvaluator["eval"](qa.algebra.MathExpression.EBinop(op,ev1,ev2),state);
+									break;
+								default:
+									result = qa.algebra.MathExpression.EBinop(op,ev1,ev2);
+								}
+								break;
+							default:
+								result = qa.algebra.MathExpression.EBinop(op,ev1,ev2);
+							}
+							break;
+						default:
+							result = qa.algebra.MathExpression.EBinop(op,ev1,ev2);
+						}
+						break;
+					default:
+						result = qa.algebra.MathExpression.EBinop(op,ev1,ev2);
+					}
+				}
+				break;
+			default:
+				var ev1 = qa.algebra.AlgebraEvaluator["eval"](e1,state);
+				var ev2 = qa.algebra.AlgebraEvaluator["eval"](e2,state);
+				switch(ev1[1]) {
+				case 0:
+					switch(ev1[2][1]) {
+					case 0:
+						switch(ev2[1]) {
+						case 0:
+							switch(ev2[2][1]) {
+							case 0:
+								var a4 = ev1[2][2];
+								var b4 = ev2[2][2];
+								result = qa.algebra.AlgebraEvaluator["eval"](qa.algebra.MathExpression.EBinop(op,ev1,ev2),state);
+								break;
+							default:
+								result = qa.algebra.MathExpression.EBinop(op,ev1,ev2);
+							}
+							break;
+						default:
+							result = qa.algebra.MathExpression.EBinop(op,ev1,ev2);
+						}
+						break;
+					default:
+						result = qa.algebra.MathExpression.EBinop(op,ev1,ev2);
+					}
+					break;
+				default:
+					result = qa.algebra.MathExpression.EBinop(op,ev1,ev2);
+				}
+			}
+			break;
+		default:
+			var ev1 = qa.algebra.AlgebraEvaluator["eval"](e1,state);
+			var ev2 = qa.algebra.AlgebraEvaluator["eval"](e2,state);
+			switch(ev1[1]) {
+			case 0:
+				switch(ev1[2][1]) {
+				case 0:
+					switch(ev2[1]) {
+					case 0:
+						switch(ev2[2][1]) {
+						case 0:
+							var a4 = ev1[2][2];
+							var b4 = ev2[2][2];
+							result = qa.algebra.AlgebraEvaluator["eval"](qa.algebra.MathExpression.EBinop(op,ev1,ev2),state);
+							break;
+						default:
+							result = qa.algebra.MathExpression.EBinop(op,ev1,ev2);
+						}
+						break;
+					default:
+						result = qa.algebra.MathExpression.EBinop(op,ev1,ev2);
+					}
+					break;
+				default:
+					result = qa.algebra.MathExpression.EBinop(op,ev1,ev2);
+				}
+				break;
+			default:
+				result = qa.algebra.MathExpression.EBinop(op,ev1,ev2);
+			}
+		}
+		break;
+	case 2:
+		var e3 = e[2];
+		result = qa.algebra.AlgebraEvaluator["eval"](e3,state);
+		break;
+	case 3:
+		var e4 = e[2];
+		switch(e4[1]) {
+		case 0:
+			switch(e4[2][1]) {
+			case 0:
+				var c1 = e4[2][2];
+				result = qa.algebra.MathExpression.ESymbol(qa.algebra.Symbol.SConst((function($this) {
+					var $r;
+					switch(c1[1]) {
+					case 0:
+						$r = (function($this) {
+							var $r;
+							var format1 = c1[3];
+							var n = c1[2];
+							$r = qa.algebra.Constant.CInteger(-n,format1);
+							return $r;
+						}($this));
+						break;
+					case 1:
+						$r = (function($this) {
+							var $r;
+							var n1 = c1[2];
+							$r = qa.algebra.Constant.CRational(qa.arithmetic._Arithmetic.SimpleFraction_Impl_.subtract(qa.arithmetic._Arithmetic.SimpleFraction_Impl_.ZERO,n1));
+							return $r;
+						}($this));
+						break;
+					case 2:
+						$r = (function($this) {
+							var $r;
+							var n2 = c1[2];
+							$r = qa.algebra.Constant.CReal(-n2);
+							return $r;
+						}($this));
+						break;
+					}
+					return $r;
+				}(this))));
+				break;
+			default:
+				if((function($this) {
+					var $r;
+					switch(e4[1]) {
+					case 0:
+						$r = (function($this) {
+							var $r;
+							switch(e4[2][1]) {
+							case 0:
+								$r = true;
+								break;
+							default:
+								$r = false;
+							}
+							return $r;
+						}($this));
+						break;
+					default:
+						$r = false;
+					}
+					return $r;
+				}(this))) throw "Unimplemented negation " + Std.string(e4);
+				result = qa.algebra.AlgebraEvaluator["eval"](qa.algebra.MathExpression.ENeg(qa.algebra.AlgebraEvaluator["eval"](e4,state)),state);
+			}
+			break;
+		default:
+			if((function($this) {
+				var $r;
+				switch(e4[1]) {
+				case 0:
+					$r = (function($this) {
+						var $r;
+						switch(e4[2][1]) {
+						case 0:
+							$r = true;
+							break;
+						default:
+							$r = false;
+						}
+						return $r;
+					}($this));
+					break;
+				default:
+					$r = false;
+				}
+				return $r;
+			}(this))) throw "Unimplemented negation " + Std.string(e4);
+			result = qa.algebra.AlgebraEvaluator["eval"](qa.algebra.MathExpression.ENeg(qa.algebra.AlgebraEvaluator["eval"](e4,state)),state);
+		}
+		break;
+	}
+	state.currentLevel--;
+	switch(e[1]) {
+	case 0:case 2:
+		break;
+	default:
+		state.addStep(qa.algebra.EvalStepType.Result(result));
+	}
+	return result;
+};
+qa.algebra.AlgebraToken = { __ename__ : true, __constructs__ : ["TSymbol","TPOpen","TPClose","TBinop","TEof"] };
+qa.algebra.AlgebraToken.TSymbol = function(c) { var $x = ["TSymbol",0,c]; $x.__enum__ = qa.algebra.AlgebraToken; $x.toString = $estr; return $x; };
+qa.algebra.AlgebraToken.TPOpen = ["TPOpen",1];
+qa.algebra.AlgebraToken.TPOpen.toString = $estr;
+qa.algebra.AlgebraToken.TPOpen.__enum__ = qa.algebra.AlgebraToken;
+qa.algebra.AlgebraToken.TPClose = ["TPClose",2];
+qa.algebra.AlgebraToken.TPClose.toString = $estr;
+qa.algebra.AlgebraToken.TPClose.__enum__ = qa.algebra.AlgebraToken;
+qa.algebra.AlgebraToken.TBinop = function(op) { var $x = ["TBinop",3,op]; $x.__enum__ = qa.algebra.AlgebraToken; $x.toString = $estr; return $x; };
+qa.algebra.AlgebraToken.TEof = ["TEof",4];
+qa.algebra.AlgebraToken.TEof.toString = $estr;
+qa.algebra.AlgebraToken.TEof.__enum__ = qa.algebra.AlgebraToken;
+qa.arithmetic = {};
+qa.arithmetic._Arithmetic = {};
+qa.arithmetic._Arithmetic.Integer_Impl_ = function() { };
+qa.arithmetic._Arithmetic.Integer_Impl_.__name__ = ["qa","arithmetic","_Arithmetic","Integer_Impl_"];
+qa.arithmetic._Arithmetic.Integer_Impl_.fromString = function(s) {
+	var n = Std.parseInt(s);
+	if(n == null) throw "Unable to convert from String to Integer: " + s;
+	var t = n;
+	return js.Boot.__cast(t , Int);
+};
+qa.arithmetic._Arithmetic.Integer_Impl_.toString = function(n) {
+	return "" + n;
+};
+qa.arithmetic._Arithmetic.Integer_Impl_.toSimpleFraction = function(n) {
+	return { a : n, b : 1};
+};
+qa.arithmetic._Arithmetic.Integer_Impl_.negate = function(n) {
+	return -n;
+};
+qa.arithmetic._Arithmetic.Integer_Impl_.abs = function(n) {
+	if(qa.arithmetic._Arithmetic.Integer_Impl_.lessThan(n,0)) return -n; else return n;
+};
+qa.arithmetic._Arithmetic.Integer_Impl_.divideInteger = function(a,b) {
+	return Math.floor(a / b);
+};
+qa.arithmetic._Arithmetic.Integer_Impl_.pow = function(a,b) {
+	var f = Math.pow(a,b);
+	if(!Math.isFinite(f)) throw new qa.arithmetic.ArithmeticError(qa.arithmetic.ArithmeticErrorType.Overflow);
+	return Math.floor(f);
+};
+qa.arithmetic._Arithmetic.Integer_Impl_.toReal = function(n) {
+	return n;
+};
+qa.arithmetic._Arithmetic.Integer_Impl_.add = function(a,b) {
+	return a + b;
+};
+qa.arithmetic._Arithmetic.Integer_Impl_.subtract = function(a,b) {
+	return a - b;
+};
+qa.arithmetic._Arithmetic.Integer_Impl_.multiply = function(a,b) {
+	return a * b;
+};
+qa.arithmetic._Arithmetic.Integer_Impl_.divide = function(a,b) {
+	return { a : a, b : b};
+};
+qa.arithmetic._Arithmetic.Integer_Impl_.greaterThan = function(a,b) {
+	return a > b;
+};
+qa.arithmetic._Arithmetic.Integer_Impl_.lessThan = function(a,b) {
+	return a < b;
+};
+qa.arithmetic.NumberFormat = { __ename__ : true, __constructs__ : ["None","Decimal","Hexadecimal"] };
+qa.arithmetic.NumberFormat.None = ["None",0];
+qa.arithmetic.NumberFormat.None.toString = $estr;
+qa.arithmetic.NumberFormat.None.__enum__ = qa.arithmetic.NumberFormat;
+qa.arithmetic.NumberFormat.Decimal = ["Decimal",1];
+qa.arithmetic.NumberFormat.Decimal.toString = $estr;
+qa.arithmetic.NumberFormat.Decimal.__enum__ = qa.arithmetic.NumberFormat;
+qa.arithmetic.NumberFormat.Hexadecimal = ["Hexadecimal",2];
+qa.arithmetic.NumberFormat.Hexadecimal.toString = $estr;
+qa.arithmetic.NumberFormat.Hexadecimal.__enum__ = qa.arithmetic.NumberFormat;
+qa.arithmetic._Arithmetic.Real_Impl_ = function() { };
+qa.arithmetic._Arithmetic.Real_Impl_.__name__ = ["qa","arithmetic","_Arithmetic","Real_Impl_"];
+qa.arithmetic._Arithmetic.Real_Impl_.fromString = function(s) {
+	var n = Std.parseFloat(s);
+	if(Math.isNaN(n)) throw "Unable to convert from String to Float: " + s;
+	return js.Boot.__cast(n , Float);
+};
+qa.arithmetic._Arithmetic.Real_Impl_.toString = function(n) {
+	return "" + n;
+};
+qa.arithmetic._Arithmetic.Real_Impl_.negate = function(n) {
+	return -n;
+};
+qa.arithmetic._Arithmetic.Real_Impl_.abs = function(n) {
+	if(qa.arithmetic._Arithmetic.Real_Impl_.lessThan(n,0)) return -n; else return n;
+};
+qa.arithmetic._Arithmetic.Real_Impl_.pow = function(a,b) {
+	return Math.pow(a,b);
+};
+qa.arithmetic._Arithmetic.Real_Impl_.add = function(a,b) {
+	return a + b;
+};
+qa.arithmetic._Arithmetic.Real_Impl_.subtract = function(a,b) {
+	return a - b;
+};
+qa.arithmetic._Arithmetic.Real_Impl_.multiply = function(a,b) {
+	return a * b;
+};
+qa.arithmetic._Arithmetic.Real_Impl_.divide = function(a,b) {
+	return a / b;
+};
+qa.arithmetic._Arithmetic.Real_Impl_.greaterThan = function(a,b) {
+	return a > b;
+};
+qa.arithmetic._Arithmetic.Real_Impl_.lessThan = function(a,b) {
+	return a < b;
+};
+qa.algebra.AlgebraLexer = function() {
 	hxparse.Lexer.call(this,null);
 };
-qa.ArithmeticLexer.__name__ = ["qa","ArithmeticLexer"];
-qa.ArithmeticLexer.__interfaces__ = [hxparse.RuleBuilder];
-qa.ArithmeticLexer.__super__ = hxparse.Lexer;
-qa.ArithmeticLexer.prototype = $extend(hxparse.Lexer.prototype,{
+qa.algebra.AlgebraLexer.__name__ = ["qa","algebra","AlgebraLexer"];
+qa.algebra.AlgebraLexer.__interfaces__ = [hxparse.RuleBuilder];
+qa.algebra.AlgebraLexer.__super__ = hxparse.Lexer;
+qa.algebra.AlgebraLexer.prototype = $extend(hxparse.Lexer.prototype,{
 	reset: function(input,sourceName) {
 		if(sourceName == null) sourceName = "<input>";
 		this.current = "";
@@ -2371,16 +2596,16 @@ qa.ArithmeticLexer.prototype = $extend(hxparse.Lexer.prototype,{
 		this.source = sourceName;
 		this.pos = 0;
 	}
-	,__class__: qa.ArithmeticLexer
+	,__class__: qa.algebra.AlgebraLexer
 });
-qa.ArithmeticParser = function(stream,ruleset) {
+qa.algebra.AlgebraParser = function(stream,ruleset) {
 	this.steps = new Array();
-	hxparse.Parser_qa_ArithmeticLexer_qa_ArithmeticToken.call(this,stream,ruleset);
+	hxparse.Parser_qa_algebra_AlgebraLexer_qa_algebra_AlgebraToken.call(this,stream,ruleset);
 };
-qa.ArithmeticParser.__name__ = ["qa","ArithmeticParser"];
-qa.ArithmeticParser.__interfaces__ = [hxparse.ParserBuilder];
-qa.ArithmeticParser.__super__ = hxparse.Parser_qa_ArithmeticLexer_qa_ArithmeticToken;
-qa.ArithmeticParser.prototype = $extend(hxparse.Parser_qa_ArithmeticLexer_qa_ArithmeticToken.prototype,{
+qa.algebra.AlgebraParser.__name__ = ["qa","algebra","AlgebraParser"];
+qa.algebra.AlgebraParser.__interfaces__ = [hxparse.ParserBuilder];
+qa.algebra.AlgebraParser.__super__ = hxparse.Parser_qa_algebra_AlgebraLexer_qa_algebra_AlgebraToken;
+qa.algebra.AlgebraParser.prototype = $extend(hxparse.Parser_qa_algebra_AlgebraLexer_qa_algebra_AlgebraToken.prototype,{
 	steps: null
 	,reset: function() {
 		this.token = null;
@@ -2390,11 +2615,12 @@ qa.ArithmeticParser.prototype = $extend(hxparse.Parser_qa_ArithmeticLexer_qa_Ari
 		this.steps.push(msg);
 	}
 	,peek: function(n) {
-		var t = hxparse.Parser_qa_ArithmeticLexer_qa_ArithmeticToken.prototype.peek.call(this,n);
+		var t = hxparse.Parser_qa_algebra_AlgebraLexer_qa_algebra_AlgebraToken.prototype.peek.call(this,n);
 		this.step("peek(" + n + "): " + Std.string(t));
 		return t;
 	}
 	,parse: function() {
+		this.step("parse");
 		var e;
 		{
 			var _g = this.peek(0);
@@ -2405,7 +2631,7 @@ qa.ArithmeticParser.prototype = $extend(hxparse.Parser_qa_ArithmeticLexer_qa_Ari
 					this.last = this.token.elt;
 					this.token = this.token.next;
 					var e1 = this.parseElement();
-					e = this.parseNext(qa.ArithmeticExpr.ENeg(e1));
+					e = this.parseNext(qa.algebra.MathExpression.ENeg(e1));
 					break;
 				default:
 					e = this.parseNext(this.parseElement());
@@ -2415,6 +2641,7 @@ qa.ArithmeticParser.prototype = $extend(hxparse.Parser_qa_ArithmeticLexer_qa_Ari
 				e = this.parseNext(this.parseElement());
 			}
 		}
+		this.step("postparse " + Std.string(this.peek(0)));
 		return e;
 	}
 	,parseElement: function() {
@@ -2425,8 +2652,8 @@ qa.ArithmeticParser.prototype = $extend(hxparse.Parser_qa_ArithmeticLexer_qa_Ari
 				var c = _g[2];
 				this.last = this.token.elt;
 				this.token = this.token.next;
-				this.step("const " + Std.string(c));
-				return qa.ArithmeticExpr.EConst(c);
+				this.step("symbol " + Std.string(c));
+				return qa.algebra.MathExpression.ESymbol(c);
 			case 1:
 				this.last = this.token.elt;
 				this.token = this.token.next;
@@ -2437,7 +2664,7 @@ qa.ArithmeticParser.prototype = $extend(hxparse.Parser_qa_ArithmeticLexer_qa_Ari
 					this.last = this.token.elt;
 					this.token = this.token.next;
 					this.step("paren " + Std.string(e));
-					return qa.ArithmeticExpr.EParenthesis(e);
+					return qa.algebra.MathExpression.EParenthesis(e);
 				default:
 					throw new hxparse.Unexpected(this.peek(0),this.stream.curPos());
 				}
@@ -2448,6 +2675,7 @@ qa.ArithmeticParser.prototype = $extend(hxparse.Parser_qa_ArithmeticLexer_qa_Ari
 		}
 	}
 	,parseNext: function(e1) {
+		this.step("parseNext");
 		{
 			var _g = this.peek(0);
 			switch(_g[1]) {
@@ -2456,428 +2684,154 @@ qa.ArithmeticParser.prototype = $extend(hxparse.Parser_qa_ArithmeticLexer_qa_Ari
 				this.last = this.token.elt;
 				this.token = this.token.next;
 				var e2 = this.parse();
-				this.step("binop " + Std.string(op) + " " + Std.string(e1) + " " + Std.string(e2));
-				return this.binop(e1,op,e2);
+				return this.binop(op,e1,e2);
 			default:
 				this.step("pass " + Std.string(e1));
 				return e1;
 			}
 		}
 	}
-	,binop: function(e1,op,e2) {
+	,binop: function(op,e1,e2) {
+		this.step("B " + Std.string(op));
+		this.step(qa.algebra.AlgebraPrinter.printTexInline(e1));
+		this.step(qa.algebra.AlgebraPrinter.printTexInline(e2));
+		var ret;
 		switch(e2[1]) {
 		case 1:
-			var op2 = e2[2];
-			switch(e2[2][1]) {
-			case 0:
-				var op1 = op;
-				switch(op[1]) {
-				case 2:
-					var e3 = e2[3];
-					var e4 = e2[4];
-					this.step("binopswitch e1=" + Std.string(e1) + " op=" + Std.string(op1) + " e2=" + Std.string(e2) + " op2=" + Std.string(op2) + " e3=" + Std.string(e3) + " e4=" + Std.string(e4));
-					return qa.ArithmeticExpr.EBinop(op2,qa.ArithmeticExpr.EBinop(op1,e1,e3),e4);
-				case 3:
-					var e3 = e2[3];
-					var e4 = e2[4];
-					this.step("binopswitch e1=" + Std.string(e1) + " op=" + Std.string(op1) + " e2=" + Std.string(e2) + " op2=" + Std.string(op2) + " e3=" + Std.string(e3) + " e4=" + Std.string(e4));
-					return qa.ArithmeticExpr.EBinop(op2,qa.ArithmeticExpr.EBinop(op1,e1,e3),e4);
-				case 4:
-					var e3 = e2[3];
-					var e4 = e2[4];
-					this.step("binopswitch e1=" + Std.string(e1) + " op=" + Std.string(op1) + " e2=" + Std.string(e2) + " op2=" + Std.string(op2) + " e3=" + Std.string(e3) + " e4=" + Std.string(e4));
-					return qa.ArithmeticExpr.EBinop(op2,qa.ArithmeticExpr.EBinop(op1,e1,e3),e4);
-				default:
-					this.step("binoppass " + Std.string(e1) + " " + Std.string(op) + " " + Std.string(e2));
-					return qa.ArithmeticExpr.EBinop(op,e1,e2);
-				}
-				break;
-			case 1:
-				var op1 = op;
-				switch(op[1]) {
-				case 2:case 3:
-					var e3 = e2[3];
-					var e4 = e2[4];
-					this.step("binopswitch e1=" + Std.string(e1) + " op=" + Std.string(op1) + " e2=" + Std.string(e2) + " op2=" + Std.string(op2) + " e3=" + Std.string(e3) + " e4=" + Std.string(e4));
-					return qa.ArithmeticExpr.EBinop(op2,qa.ArithmeticExpr.EBinop(op1,e1,e3),e4);
-				case 4:
-					var e3 = e2[3];
-					var e4 = e2[4];
-					this.step("binopswitch e1=" + Std.string(e1) + " op=" + Std.string(op1) + " e2=" + Std.string(e2) + " op2=" + Std.string(op2) + " e3=" + Std.string(e3) + " e4=" + Std.string(e4));
-					return qa.ArithmeticExpr.EBinop(op2,qa.ArithmeticExpr.EBinop(op1,e1,e3),e4);
-				default:
-					this.step("binoppass " + Std.string(e1) + " " + Std.string(op) + " " + Std.string(e2));
-					return qa.ArithmeticExpr.EBinop(op,e1,e2);
-				}
-				break;
-			case 2:
-				var op1 = op;
-				switch(op[1]) {
-				case 3:
-					var e3 = e2[3];
-					var e4 = e2[4];
-					this.step("binopswitch e1=" + Std.string(e1) + " op=" + Std.string(op1) + " e2=" + Std.string(e2) + " op2=" + Std.string(op2) + " e3=" + Std.string(e3) + " e4=" + Std.string(e4));
-					return qa.ArithmeticExpr.EBinop(op2,qa.ArithmeticExpr.EBinop(op1,e1,e3),e4);
-				case 4:
-					var e3 = e2[3];
-					var e4 = e2[4];
-					this.step("binopswitch e1=" + Std.string(e1) + " op=" + Std.string(op1) + " e2=" + Std.string(e2) + " op2=" + Std.string(op2) + " e3=" + Std.string(e3) + " e4=" + Std.string(e4));
-					return qa.ArithmeticExpr.EBinop(op2,qa.ArithmeticExpr.EBinop(op1,e1,e3),e4);
-				default:
-					this.step("binoppass " + Std.string(e1) + " " + Std.string(op) + " " + Std.string(e2));
-					return qa.ArithmeticExpr.EBinop(op,e1,e2);
-				}
-				break;
-			default:
-				var op1 = op;
-				switch(op[1]) {
-				case 4:
-					var e3 = e2[3];
-					var e4 = e2[4];
-					this.step("binopswitch e1=" + Std.string(e1) + " op=" + Std.string(op1) + " e2=" + Std.string(e2) + " op2=" + Std.string(op2) + " e3=" + Std.string(e3) + " e4=" + Std.string(e4));
-					return qa.ArithmeticExpr.EBinop(op2,qa.ArithmeticExpr.EBinop(op1,e1,e3),e4);
-				default:
-					this.step("binoppass " + Std.string(e1) + " " + Std.string(op) + " " + Std.string(e2));
-					return qa.ArithmeticExpr.EBinop(op,e1,e2);
-				}
+			var e22 = e2[4];
+			var e21 = e2[3];
+			var e2op = e2[2];
+			if(qa.algebra.Algebra.getPrecedenceRank(op) > qa.algebra.Algebra.getPrecedenceRank(e2op)) {
+				this.step("binopswitch " + Std.string(e2op) + " " + Std.string(e21) + " " + Std.string(e22));
+				ret = qa.algebra.MathExpression.EBinop(e2op,this.binop(op,e1,e21),e22);
+			} else {
+				this.step("binoppass " + Std.string(e1) + " " + Std.string(op) + " " + Std.string(e2));
+				ret = qa.algebra.MathExpression.EBinop(op,e1,e2);
 			}
 			break;
 		default:
 			this.step("binoppass " + Std.string(e1) + " " + Std.string(op) + " " + Std.string(e2));
-			return qa.ArithmeticExpr.EBinop(op,e1,e2);
+			ret = qa.algebra.MathExpression.EBinop(op,e1,e2);
 		}
+		return ret;
 	}
-	,__class__: qa.ArithmeticParser
+	,__class__: qa.algebra.AlgebraParser
 });
-qa.EvalStepType = { __ename__ : true, __constructs__ : ["Expression","Result","Promote"] };
-qa.EvalStepType.Expression = function(e) { var $x = ["Expression",0,e]; $x.__enum__ = qa.EvalStepType; return $x; };
-qa.EvalStepType.Result = function(c) { var $x = ["Result",1,c]; $x.__enum__ = qa.EvalStepType; return $x; };
-qa.EvalStepType.Promote = function(c,p) { var $x = ["Promote",2,c,p]; $x.__enum__ = qa.EvalStepType; return $x; };
-qa.EvalState = function() {
-	this.steps = new List();
+qa.arithmetic.ArithmeticError = function(type) {
+	this.type = type;
 };
-qa.EvalState.__name__ = ["qa","EvalState"];
-qa.EvalState.prototype = {
-	currentLevel: null
-	,steps: null
-	,addStep: function(type) {
-		this.steps.add({ type : type, level : this.currentLevel});
-	}
-	,__class__: qa.EvalState
+qa.arithmetic.ArithmeticError.__name__ = ["qa","arithmetic","ArithmeticError"];
+qa.arithmetic.ArithmeticError.prototype = {
+	type: null
+	,__class__: qa.arithmetic.ArithmeticError
 };
-qa.ArithmeticEvaluator = function() { };
-qa.ArithmeticEvaluator.__name__ = ["qa","ArithmeticEvaluator"];
-qa.ArithmeticEvaluator.getConstantRank = function(c) {
-	switch(c[1]) {
-	case 0:
-		return 0;
-	case 1:
-		return 1;
-	case 2:
-		return 2;
-	}
+qa.arithmetic.ArithmeticErrorType = { __ename__ : true, __constructs__ : ["DivisionByZero","UnsupportedOperation","Overflow"] };
+qa.arithmetic.ArithmeticErrorType.DivisionByZero = ["DivisionByZero",0];
+qa.arithmetic.ArithmeticErrorType.DivisionByZero.toString = $estr;
+qa.arithmetic.ArithmeticErrorType.DivisionByZero.__enum__ = qa.arithmetic.ArithmeticErrorType;
+qa.arithmetic.ArithmeticErrorType.UnsupportedOperation = function(msg) { var $x = ["UnsupportedOperation",1,msg]; $x.__enum__ = qa.arithmetic.ArithmeticErrorType; $x.toString = $estr; return $x; };
+qa.arithmetic.ArithmeticErrorType.Overflow = ["Overflow",2];
+qa.arithmetic.ArithmeticErrorType.Overflow.toString = $estr;
+qa.arithmetic.ArithmeticErrorType.Overflow.__enum__ = qa.arithmetic.ArithmeticErrorType;
+qa.arithmetic._Arithmetic.SimpleFraction_Impl_ = function() { };
+qa.arithmetic._Arithmetic.SimpleFraction_Impl_.__name__ = ["qa","arithmetic","_Arithmetic","SimpleFraction_Impl_"];
+qa.arithmetic._Arithmetic.SimpleFraction_Impl_.toReal = function(n) {
+	var v = n;
+	return qa.arithmetic._Arithmetic.Real_Impl_.divide(qa.arithmetic._Arithmetic.Integer_Impl_.toReal(v.a),qa.arithmetic._Arithmetic.Integer_Impl_.toReal(v.b));
 };
-qa.ArithmeticEvaluator.changeRank = function(c,base,state) {
-	var rb = qa.ArithmeticEvaluator.getConstantRank(base);
-	var rc = qa.ArithmeticEvaluator.getConstantRank(c);
-	while(rc != rb) {
-		if(rc < rb) {
-			var p = qa.ArithmeticEvaluator.promoteConst(c);
-			state.addStep(qa.EvalStepType.Promote(c,p));
-			c = p;
-		} else throw "Constant demotion not supported";
-		var nrc = qa.ArithmeticEvaluator.getConstantRank(c);
-		if(nrc == rc) throw "Constant rank change error " + Std.string(c) + "(" + rc + " == " + nrc + ") " + Std.string(base) + "(" + rb + ")";
-		rc = nrc;
-	}
-	return c;
+qa.arithmetic._Arithmetic.SimpleFraction_Impl_.getNumerator = function(this1) {
+	return this1.a;
 };
-qa.ArithmeticEvaluator.promoteConst = function(c) {
-	switch(c[1]) {
-	case 0:
-		var n = c[2];
-		return qa.Constant.CRational(qa._Arithmetic.Integer_Impl_.toSimpleFraction(n));
-	case 1:
-		var n1 = c[2];
-		return qa.Constant.CReal(qa._Arithmetic.SimpleFraction_Impl_.toReal(n1));
-	default:
-		throw "Unimplemented rank promotion for " + Std.string(c);
-	}
+qa.arithmetic._Arithmetic.SimpleFraction_Impl_.getDenominator = function(this1) {
+	return this1.b;
 };
-qa.ArithmeticEvaluator["eval"] = function(e,state) {
-	state.currentLevel++;
-	switch(e[1]) {
-	case 0:case 2:
+qa.arithmetic._Arithmetic.SimpleFraction_Impl_.gcd = function(this1) {
+	var d = 0;
+	var r = 0;
+	var a;
+	var n = this1.a;
+	if(qa.arithmetic._Arithmetic.Integer_Impl_.lessThan(n,0)) a = -n; else a = n;
+	var b;
+	var n1 = this1.b;
+	if(qa.arithmetic._Arithmetic.Integer_Impl_.lessThan(n1,0)) b = -n1; else b = n1;
+	while(true) if(b == 0) {
+		d = a;
 		break;
-	default:
-		state.addStep(qa.EvalStepType.Expression(e));
+	} else {
+		r = a % b;
+		a = b;
+		b = r;
 	}
-	var result;
-	switch(e[1]) {
-	case 0:
-		var c = e[2];
-		result = c;
-		break;
-	case 1:
-		var e2 = e[4];
-		var e1 = e[3];
-		var op = e[2];
-		switch(e1[1]) {
-		case 0:
-			var a = e1[2];
-			switch(e1[2][1]) {
-			case 0:
-				switch(e2[1]) {
-				case 0:
-					var b = e2[2];
-					switch(e2[2][1]) {
-					case 0:
-						var a1 = e1[2][2];
-						var opa = e1[2][3];
-						var opb = e2[2][3];
-						var b1 = e2[2][2];
-						var format;
-						switch(opa[1]) {
-						case 2:
-							switch(opb[1]) {
-							case 2:
-								format = qa.NumberFormat.Hexadecimal;
-								break;
-							case 1:
-								format = qa.NumberFormat.Decimal;
-								break;
-							default:
-								format = qa.NumberFormat.None;
-							}
-							break;
-						case 1:
-							switch(opb[1]) {
-							case 2:case 1:
-								format = qa.NumberFormat.Decimal;
-								break;
-							default:
-								format = qa.NumberFormat.None;
-							}
-							break;
-						default:
-							format = qa.NumberFormat.None;
-						}
-						switch(op[1]) {
-						case 0:
-							result = qa.Constant.CInteger(qa._Arithmetic.Integer_Impl_.add(a1,b1),format);
-							break;
-						case 1:
-							result = qa.Constant.CInteger(qa._Arithmetic.Integer_Impl_.subtract(a1,b1),format);
-							break;
-						case 2:
-							result = qa.Constant.CInteger(qa._Arithmetic.Integer_Impl_.multiply(a1,b1),format);
-							break;
-						case 3:
-							result = qa.Constant.CRational(qa._Arithmetic.Integer_Impl_.divide(a1,b1));
-							break;
-						case 4:
-							result = qa.Constant.CInteger((function($this) {
-								var $r;
-								var f = Math.pow(a1,b1);
-								if(!Math.isFinite(f)) throw new qa.ArithmeticError(qa.MathError.Overflow);
-								$r = Math.floor(f);
-								return $r;
-							}(this)),qa.NumberFormat.None);
-							break;
-						}
-						break;
-					default:
-						var ra = qa.ArithmeticEvaluator.getConstantRank(a);
-						var rb = qa.ArithmeticEvaluator.getConstantRank(b);
-						if(ra == rb) throw "Unimplemented binop " + Std.string(op) + " " + Std.string(e1) + " " + Std.string(e2);
-						result = qa.ArithmeticEvaluator["eval"](rb > ra?qa.ArithmeticExpr.EBinop(op,qa.ArithmeticExpr.EConst(qa.ArithmeticEvaluator.changeRank(a,b,state)),e2):qa.ArithmeticExpr.EBinop(op,e1,qa.ArithmeticExpr.EConst(qa.ArithmeticEvaluator.changeRank(b,a,state))),state);
-					}
-					break;
-				default:
-					result = qa.ArithmeticEvaluator["eval"](qa.ArithmeticExpr.EBinop(op,qa.ArithmeticExpr.EConst(qa.ArithmeticEvaluator["eval"](e1,state)),qa.ArithmeticExpr.EConst(qa.ArithmeticEvaluator["eval"](e2,state))),state);
-				}
-				break;
-			case 1:
-				switch(e2[1]) {
-				case 0:
-					var b = e2[2];
-					switch(e2[2][1]) {
-					case 1:
-						var a2 = e1[2][2];
-						var b2 = e2[2][2];
-						switch(op[1]) {
-						case 0:
-							result = qa.Constant.CRational(qa._Arithmetic.SimpleFraction_Impl_.add(a2,b2));
-							break;
-						case 1:
-							result = qa.Constant.CRational(qa._Arithmetic.SimpleFraction_Impl_.subtract(a2,b2));
-							break;
-						case 2:
-							result = qa.Constant.CRational(qa._Arithmetic.SimpleFraction_Impl_.multiply(a2,b2));
-							break;
-						case 3:
-							result = qa.Constant.CRational(qa._Arithmetic.SimpleFraction_Impl_.divide(a2,b2));
-							break;
-						case 4:
-							result = qa.Constant.CRational((function($this) {
-								var $r;
-								var va = a2;
-								var vb = b2;
-								if(vb.b != 1) throw new qa.ArithmeticError(qa.MathError.UnsupportedOperation("Fractional powers not supported"));
-								var r = { a : (function($this) {
-									var $r;
-									var f1 = Math.pow(va.a,vb.a);
-									if(!Math.isFinite(f1)) throw new qa.ArithmeticError(qa.MathError.Overflow);
-									$r = Math.floor(f1);
-									return $r;
-								}($this)), b : (function($this) {
-									var $r;
-									var f2 = Math.pow(va.b,vb.a);
-									if(!Math.isFinite(f2)) throw new qa.ArithmeticError(qa.MathError.Overflow);
-									$r = Math.floor(f2);
-									return $r;
-								}($this))};
-								qa._Arithmetic.SimpleFraction_Impl_.post(r);
-								$r = r;
-								return $r;
-							}(this)));
-							break;
-						}
-						break;
-					default:
-						var ra = qa.ArithmeticEvaluator.getConstantRank(a);
-						var rb = qa.ArithmeticEvaluator.getConstantRank(b);
-						if(ra == rb) throw "Unimplemented binop " + Std.string(op) + " " + Std.string(e1) + " " + Std.string(e2);
-						result = qa.ArithmeticEvaluator["eval"](rb > ra?qa.ArithmeticExpr.EBinop(op,qa.ArithmeticExpr.EConst(qa.ArithmeticEvaluator.changeRank(a,b,state)),e2):qa.ArithmeticExpr.EBinop(op,e1,qa.ArithmeticExpr.EConst(qa.ArithmeticEvaluator.changeRank(b,a,state))),state);
-					}
-					break;
-				default:
-					result = qa.ArithmeticEvaluator["eval"](qa.ArithmeticExpr.EBinop(op,qa.ArithmeticExpr.EConst(qa.ArithmeticEvaluator["eval"](e1,state)),qa.ArithmeticExpr.EConst(qa.ArithmeticEvaluator["eval"](e2,state))),state);
-				}
-				break;
-			case 2:
-				switch(e2[1]) {
-				case 0:
-					var b = e2[2];
-					switch(e2[2][1]) {
-					case 2:
-						var a3 = e1[2][2];
-						var b3 = e2[2][2];
-						switch(op[1]) {
-						case 0:
-							result = qa.Constant.CReal(qa._Arithmetic.Real_Impl_.add(a3,b3));
-							break;
-						case 1:
-							result = qa.Constant.CReal(qa._Arithmetic.Real_Impl_.subtract(a3,b3));
-							break;
-						case 2:
-							result = qa.Constant.CReal(qa._Arithmetic.Real_Impl_.multiply(a3,b3));
-							break;
-						case 3:
-							result = qa.Constant.CReal(qa._Arithmetic.Real_Impl_.divide(a3,b3));
-							break;
-						case 4:
-							result = qa.Constant.CReal(Math.pow(a3,b3));
-							break;
-						}
-						break;
-					default:
-						var ra = qa.ArithmeticEvaluator.getConstantRank(a);
-						var rb = qa.ArithmeticEvaluator.getConstantRank(b);
-						if(ra == rb) throw "Unimplemented binop " + Std.string(op) + " " + Std.string(e1) + " " + Std.string(e2);
-						result = qa.ArithmeticEvaluator["eval"](rb > ra?qa.ArithmeticExpr.EBinop(op,qa.ArithmeticExpr.EConst(qa.ArithmeticEvaluator.changeRank(a,b,state)),e2):qa.ArithmeticExpr.EBinop(op,e1,qa.ArithmeticExpr.EConst(qa.ArithmeticEvaluator.changeRank(b,a,state))),state);
-					}
-					break;
-				default:
-					result = qa.ArithmeticEvaluator["eval"](qa.ArithmeticExpr.EBinop(op,qa.ArithmeticExpr.EConst(qa.ArithmeticEvaluator["eval"](e1,state)),qa.ArithmeticExpr.EConst(qa.ArithmeticEvaluator["eval"](e2,state))),state);
-				}
-				break;
-			}
-			break;
-		default:
-			result = qa.ArithmeticEvaluator["eval"](qa.ArithmeticExpr.EBinop(op,qa.ArithmeticExpr.EConst(qa.ArithmeticEvaluator["eval"](e1,state)),qa.ArithmeticExpr.EConst(qa.ArithmeticEvaluator["eval"](e2,state))),state);
-		}
-		break;
-	case 2:
-		var e11 = e[2];
-		result = qa.ArithmeticEvaluator["eval"](e11,state);
-		break;
-	case 3:
-		var e3 = e[2];
-		switch(e3[1]) {
-		case 0:
-			switch(e3[2][1]) {
-			case 0:
-				var format1 = e3[2][3];
-				var n = e3[2][2];
-				result = qa.Constant.CInteger(-n,format1);
-				break;
-			case 1:
-				var n1 = e3[2][2];
-				result = qa.Constant.CRational(qa._Arithmetic.SimpleFraction_Impl_.subtract(qa._Arithmetic.SimpleFraction_Impl_.ZERO,n1));
-				break;
-			default:
-				if((function($this) {
-					var $r;
-					switch(e3[1]) {
-					case 0:
-						$r = true;
-						break;
-					default:
-						$r = false;
-					}
-					return $r;
-				}(this))) throw "Unimplemented negation " + Std.string(e3);
-				result = qa.ArithmeticEvaluator["eval"](qa.ArithmeticExpr.ENeg(qa.ArithmeticExpr.EConst(qa.ArithmeticEvaluator["eval"](e3,state))),state);
-			}
-			break;
-		default:
-			if((function($this) {
-				var $r;
-				switch(e3[1]) {
-				case 0:
-					$r = true;
-					break;
-				default:
-					$r = false;
-				}
-				return $r;
-			}(this))) throw "Unimplemented negation " + Std.string(e3);
-			result = qa.ArithmeticEvaluator["eval"](qa.ArithmeticExpr.ENeg(qa.ArithmeticExpr.EConst(qa.ArithmeticEvaluator["eval"](e3,state))),state);
-		}
-		break;
-	}
-	state.currentLevel--;
-	switch(e[1]) {
-	case 0:case 2:
-		break;
-	default:
-		state.addStep(qa.EvalStepType.Result(result));
-	}
-	return result;
+	return d;
 };
-qa.Ksi = function() {
-	this.lexer = new qa.ArithmeticLexer();
-	this.parser = new qa.ArithmeticParser(this.lexer,qa.ArithmeticLexer.tok);
+qa.arithmetic._Arithmetic.SimpleFraction_Impl_.post = function(this1) {
+	qa.arithmetic._Arithmetic.SimpleFraction_Impl_.simplify(this1);
 };
-qa.Ksi.__name__ = ["qa","Ksi"];
-qa.Ksi.prototype = {
-	lexer: null
-	,parser: null
-	,answer: function(text) {
-		var bytes = byte.js._ByteData.ByteData_Impl_.ofString(text);
-		var tokens = "";
-		this.lexer.reset(bytes);
-		var tok;
-		while((tok = this.lexer.token(qa.ArithmeticLexer.tok)) != qa.ArithmeticToken.TEof) tokens += Std.string(tok) + "<br/>";
-		this.lexer.reset(bytes);
-		this.parser.reset();
-		var expr = this.parser.parse();
-		var evalState = new qa.EvalState();
-		var answer = qa.ArithmeticEvaluator["eval"](expr,evalState);
-		return { question : qa.ArithmeticPrinter.printTex(expr), answer : "" + qa.ArithmeticPrinter.printTex(qa.ArithmeticExpr.EConst(answer)), debug : "<h3>Evaluation steps</h3>" + "<div class='steps eval'>" + evalState.steps.map(qa.ArithmeticPrinter.printEvalStep).join("\n") + "</div>" + Std.string(expr) + "<br/>" + "<div class='tokens'>" + tokens + "</div>" + "<h3>Parsing steps</h3>" + "<div class='steps parser'>" + this.parser.steps.join("<br/>") + "</div>"};
+qa.arithmetic._Arithmetic.SimpleFraction_Impl_.simplify = function(this1) {
+	qa.arithmetic._Arithmetic.SimpleFraction_Impl_.reduce(this1);
+	var v = this1;
+	if(qa.arithmetic._Arithmetic.Integer_Impl_.lessThan(v.a,0) && qa.arithmetic._Arithmetic.Integer_Impl_.lessThan(v.b,0)) {
+		v.a = -v.a;
+		v.b = -v.b;
 	}
-	,__class__: qa.Ksi
+};
+qa.arithmetic._Arithmetic.SimpleFraction_Impl_.reduce = function(this1) {
+	var d = qa.arithmetic._Arithmetic.SimpleFraction_Impl_.gcd(this1);
+	var v = this1;
+	v.a = Math.floor(v.a / d);
+	v.b = Math.floor(v.b / d);
+};
+qa.arithmetic._Arithmetic.SimpleFraction_Impl_.pow = function(a,b) {
+	var va = a;
+	var vb = b;
+	if(vb.b != 1) throw new qa.arithmetic.ArithmeticError(qa.arithmetic.ArithmeticErrorType.UnsupportedOperation("Fractional powers not supported"));
+	var r = { a : (function($this) {
+		var $r;
+		var f = Math.pow(va.a,vb.a);
+		if(!Math.isFinite(f)) throw new qa.arithmetic.ArithmeticError(qa.arithmetic.ArithmeticErrorType.Overflow);
+		$r = Math.floor(f);
+		return $r;
+	}(this)), b : (function($this) {
+		var $r;
+		var f1 = Math.pow(va.b,vb.a);
+		if(!Math.isFinite(f1)) throw new qa.arithmetic.ArithmeticError(qa.arithmetic.ArithmeticErrorType.Overflow);
+		$r = Math.floor(f1);
+		return $r;
+	}(this))};
+	qa.arithmetic._Arithmetic.SimpleFraction_Impl_.post(r);
+	return r;
+};
+qa.arithmetic._Arithmetic.SimpleFraction_Impl_.negate = function(n) {
+	return qa.arithmetic._Arithmetic.SimpleFraction_Impl_.subtract(qa.arithmetic._Arithmetic.SimpleFraction_Impl_.ZERO,n);
+};
+qa.arithmetic._Arithmetic.SimpleFraction_Impl_.add = function(a,b) {
+	var va = a;
+	var vb = b;
+	var r = { a : qa.arithmetic._Arithmetic.Integer_Impl_.add(qa.arithmetic._Arithmetic.Integer_Impl_.multiply(va.a,vb.b),qa.arithmetic._Arithmetic.Integer_Impl_.multiply(vb.a,va.b)), b : qa.arithmetic._Arithmetic.Integer_Impl_.multiply(va.b,vb.b)};
+	qa.arithmetic._Arithmetic.SimpleFraction_Impl_.post(r);
+	return r;
+};
+qa.arithmetic._Arithmetic.SimpleFraction_Impl_.subtract = function(a,b) {
+	var va = a;
+	var vb = b;
+	var r = { a : qa.arithmetic._Arithmetic.Integer_Impl_.subtract(qa.arithmetic._Arithmetic.Integer_Impl_.multiply(va.a,vb.b),qa.arithmetic._Arithmetic.Integer_Impl_.multiply(vb.a,va.b)), b : qa.arithmetic._Arithmetic.Integer_Impl_.multiply(va.b,vb.b)};
+	qa.arithmetic._Arithmetic.SimpleFraction_Impl_.post(r);
+	return r;
+};
+qa.arithmetic._Arithmetic.SimpleFraction_Impl_.multiply = function(a,b) {
+	var va = a;
+	var vb = b;
+	var r = { a : qa.arithmetic._Arithmetic.Integer_Impl_.multiply(va.a,vb.a), b : qa.arithmetic._Arithmetic.Integer_Impl_.multiply(va.b,vb.b)};
+	qa.arithmetic._Arithmetic.SimpleFraction_Impl_.post(r);
+	return r;
+};
+qa.arithmetic._Arithmetic.SimpleFraction_Impl_.divide = function(a,b) {
+	var va = a;
+	var vb = b;
+	if(qa.arithmetic._Arithmetic.Integer_Impl_.toSimpleFraction(vb.a) == qa.arithmetic._Arithmetic.SimpleFraction_Impl_.ZERO) throw new qa.arithmetic.ArithmeticError(qa.arithmetic.ArithmeticErrorType.DivisionByZero);
+	var r = { a : qa.arithmetic._Arithmetic.Integer_Impl_.multiply(va.a,vb.b), b : qa.arithmetic._Arithmetic.Integer_Impl_.multiply(va.b,vb.a)};
+	qa.arithmetic._Arithmetic.SimpleFraction_Impl_.post(r);
+	return r;
 };
 var test = {};
 test.Test = function() {
@@ -2887,45 +2841,45 @@ test.Test.__name__ = ["test","Test"];
 test.Test.__super__ = haxe.unit.TestCase;
 test.Test.prototype = $extend(haxe.unit.TestCase.prototype,{
 	testAddZero: function() {
-		this.assertEquals("0",qa._Arithmetic.Integer_Impl_.toString(qa._Arithmetic.Integer_Impl_.add(0,0)),{ fileName : "Test.hx", lineNumber : 7, className : "test.Test", methodName : "testAddZero"});
-		this.assertEquals("1",qa._Arithmetic.Integer_Impl_.toString(qa._Arithmetic.Integer_Impl_.add(0,1)),{ fileName : "Test.hx", lineNumber : 8, className : "test.Test", methodName : "testAddZero"});
-		this.assertEquals("2",qa._Arithmetic.Integer_Impl_.toString(qa._Arithmetic.Integer_Impl_.add(0,2)),{ fileName : "Test.hx", lineNumber : 9, className : "test.Test", methodName : "testAddZero"});
-		this.assertEquals("3",qa._Arithmetic.Integer_Impl_.toString(qa._Arithmetic.Integer_Impl_.add(0,3)),{ fileName : "Test.hx", lineNumber : 10, className : "test.Test", methodName : "testAddZero"});
-		this.assertEquals("4",qa._Arithmetic.Integer_Impl_.toString(qa._Arithmetic.Integer_Impl_.add(0,4)),{ fileName : "Test.hx", lineNumber : 11, className : "test.Test", methodName : "testAddZero"});
-		this.assertEquals("5",qa._Arithmetic.Integer_Impl_.toString(qa._Arithmetic.Integer_Impl_.add(0,5)),{ fileName : "Test.hx", lineNumber : 12, className : "test.Test", methodName : "testAddZero"});
-		this.assertEquals("6",qa._Arithmetic.Integer_Impl_.toString(qa._Arithmetic.Integer_Impl_.add(0,6)),{ fileName : "Test.hx", lineNumber : 13, className : "test.Test", methodName : "testAddZero"});
-		this.assertEquals("7",qa._Arithmetic.Integer_Impl_.toString(qa._Arithmetic.Integer_Impl_.add(0,7)),{ fileName : "Test.hx", lineNumber : 14, className : "test.Test", methodName : "testAddZero"});
-		this.assertEquals("8",qa._Arithmetic.Integer_Impl_.toString(qa._Arithmetic.Integer_Impl_.add(0,8)),{ fileName : "Test.hx", lineNumber : 15, className : "test.Test", methodName : "testAddZero"});
-		this.assertEquals("9",qa._Arithmetic.Integer_Impl_.toString(qa._Arithmetic.Integer_Impl_.add(0,9)),{ fileName : "Test.hx", lineNumber : 16, className : "test.Test", methodName : "testAddZero"});
+		this.assertEquals("0",qa.arithmetic._Arithmetic.Integer_Impl_.toString(qa.arithmetic._Arithmetic.Integer_Impl_.add(0,0)),{ fileName : "Test.hx", lineNumber : 8, className : "test.Test", methodName : "testAddZero"});
+		this.assertEquals("1",qa.arithmetic._Arithmetic.Integer_Impl_.toString(qa.arithmetic._Arithmetic.Integer_Impl_.add(0,1)),{ fileName : "Test.hx", lineNumber : 9, className : "test.Test", methodName : "testAddZero"});
+		this.assertEquals("2",qa.arithmetic._Arithmetic.Integer_Impl_.toString(qa.arithmetic._Arithmetic.Integer_Impl_.add(0,2)),{ fileName : "Test.hx", lineNumber : 10, className : "test.Test", methodName : "testAddZero"});
+		this.assertEquals("3",qa.arithmetic._Arithmetic.Integer_Impl_.toString(qa.arithmetic._Arithmetic.Integer_Impl_.add(0,3)),{ fileName : "Test.hx", lineNumber : 11, className : "test.Test", methodName : "testAddZero"});
+		this.assertEquals("4",qa.arithmetic._Arithmetic.Integer_Impl_.toString(qa.arithmetic._Arithmetic.Integer_Impl_.add(0,4)),{ fileName : "Test.hx", lineNumber : 12, className : "test.Test", methodName : "testAddZero"});
+		this.assertEquals("5",qa.arithmetic._Arithmetic.Integer_Impl_.toString(qa.arithmetic._Arithmetic.Integer_Impl_.add(0,5)),{ fileName : "Test.hx", lineNumber : 13, className : "test.Test", methodName : "testAddZero"});
+		this.assertEquals("6",qa.arithmetic._Arithmetic.Integer_Impl_.toString(qa.arithmetic._Arithmetic.Integer_Impl_.add(0,6)),{ fileName : "Test.hx", lineNumber : 14, className : "test.Test", methodName : "testAddZero"});
+		this.assertEquals("7",qa.arithmetic._Arithmetic.Integer_Impl_.toString(qa.arithmetic._Arithmetic.Integer_Impl_.add(0,7)),{ fileName : "Test.hx", lineNumber : 15, className : "test.Test", methodName : "testAddZero"});
+		this.assertEquals("8",qa.arithmetic._Arithmetic.Integer_Impl_.toString(qa.arithmetic._Arithmetic.Integer_Impl_.add(0,8)),{ fileName : "Test.hx", lineNumber : 16, className : "test.Test", methodName : "testAddZero"});
+		this.assertEquals("9",qa.arithmetic._Arithmetic.Integer_Impl_.toString(qa.arithmetic._Arithmetic.Integer_Impl_.add(0,9)),{ fileName : "Test.hx", lineNumber : 17, className : "test.Test", methodName : "testAddZero"});
 	}
 	,testAddOne: function() {
-		this.assertEquals("2",qa._Arithmetic.Integer_Impl_.toString(qa._Arithmetic.Integer_Impl_.add(1,1)),{ fileName : "Test.hx", lineNumber : 19, className : "test.Test", methodName : "testAddOne"});
-		this.assertEquals("3",qa._Arithmetic.Integer_Impl_.toString(qa._Arithmetic.Integer_Impl_.add(1,2)),{ fileName : "Test.hx", lineNumber : 20, className : "test.Test", methodName : "testAddOne"});
-		this.assertEquals("4",qa._Arithmetic.Integer_Impl_.toString(qa._Arithmetic.Integer_Impl_.add(1,3)),{ fileName : "Test.hx", lineNumber : 21, className : "test.Test", methodName : "testAddOne"});
-		this.assertEquals("5",qa._Arithmetic.Integer_Impl_.toString(qa._Arithmetic.Integer_Impl_.add(1,4)),{ fileName : "Test.hx", lineNumber : 22, className : "test.Test", methodName : "testAddOne"});
-		this.assertEquals("6",qa._Arithmetic.Integer_Impl_.toString(qa._Arithmetic.Integer_Impl_.add(1,5)),{ fileName : "Test.hx", lineNumber : 23, className : "test.Test", methodName : "testAddOne"});
-		this.assertEquals("7",qa._Arithmetic.Integer_Impl_.toString(qa._Arithmetic.Integer_Impl_.add(1,6)),{ fileName : "Test.hx", lineNumber : 24, className : "test.Test", methodName : "testAddOne"});
-		this.assertEquals("8",qa._Arithmetic.Integer_Impl_.toString(qa._Arithmetic.Integer_Impl_.add(1,7)),{ fileName : "Test.hx", lineNumber : 25, className : "test.Test", methodName : "testAddOne"});
-		this.assertEquals("9",qa._Arithmetic.Integer_Impl_.toString(qa._Arithmetic.Integer_Impl_.add(1,8)),{ fileName : "Test.hx", lineNumber : 26, className : "test.Test", methodName : "testAddOne"});
+		this.assertEquals("2",qa.arithmetic._Arithmetic.Integer_Impl_.toString(qa.arithmetic._Arithmetic.Integer_Impl_.add(1,1)),{ fileName : "Test.hx", lineNumber : 20, className : "test.Test", methodName : "testAddOne"});
+		this.assertEquals("3",qa.arithmetic._Arithmetic.Integer_Impl_.toString(qa.arithmetic._Arithmetic.Integer_Impl_.add(1,2)),{ fileName : "Test.hx", lineNumber : 21, className : "test.Test", methodName : "testAddOne"});
+		this.assertEquals("4",qa.arithmetic._Arithmetic.Integer_Impl_.toString(qa.arithmetic._Arithmetic.Integer_Impl_.add(1,3)),{ fileName : "Test.hx", lineNumber : 22, className : "test.Test", methodName : "testAddOne"});
+		this.assertEquals("5",qa.arithmetic._Arithmetic.Integer_Impl_.toString(qa.arithmetic._Arithmetic.Integer_Impl_.add(1,4)),{ fileName : "Test.hx", lineNumber : 23, className : "test.Test", methodName : "testAddOne"});
+		this.assertEquals("6",qa.arithmetic._Arithmetic.Integer_Impl_.toString(qa.arithmetic._Arithmetic.Integer_Impl_.add(1,5)),{ fileName : "Test.hx", lineNumber : 24, className : "test.Test", methodName : "testAddOne"});
+		this.assertEquals("7",qa.arithmetic._Arithmetic.Integer_Impl_.toString(qa.arithmetic._Arithmetic.Integer_Impl_.add(1,6)),{ fileName : "Test.hx", lineNumber : 25, className : "test.Test", methodName : "testAddOne"});
+		this.assertEquals("8",qa.arithmetic._Arithmetic.Integer_Impl_.toString(qa.arithmetic._Arithmetic.Integer_Impl_.add(1,7)),{ fileName : "Test.hx", lineNumber : 26, className : "test.Test", methodName : "testAddOne"});
+		this.assertEquals("9",qa.arithmetic._Arithmetic.Integer_Impl_.toString(qa.arithmetic._Arithmetic.Integer_Impl_.add(1,8)),{ fileName : "Test.hx", lineNumber : 27, className : "test.Test", methodName : "testAddOne"});
 	}
 	,testAddCarry: function() {
-		this.assertEquals("10",qa._Arithmetic.Integer_Impl_.toString(qa._Arithmetic.Integer_Impl_.add(9,1)),{ fileName : "Test.hx", lineNumber : 29, className : "test.Test", methodName : "testAddCarry"});
-		this.assertEquals("11",qa._Arithmetic.Integer_Impl_.toString(qa._Arithmetic.Integer_Impl_.add(9,2)),{ fileName : "Test.hx", lineNumber : 30, className : "test.Test", methodName : "testAddCarry"});
-		this.assertEquals("12",qa._Arithmetic.Integer_Impl_.toString(qa._Arithmetic.Integer_Impl_.add(9,3)),{ fileName : "Test.hx", lineNumber : 31, className : "test.Test", methodName : "testAddCarry"});
-		this.assertEquals("13",qa._Arithmetic.Integer_Impl_.toString(qa._Arithmetic.Integer_Impl_.add(9,4)),{ fileName : "Test.hx", lineNumber : 32, className : "test.Test", methodName : "testAddCarry"});
-		this.assertEquals("14",qa._Arithmetic.Integer_Impl_.toString(qa._Arithmetic.Integer_Impl_.add(9,5)),{ fileName : "Test.hx", lineNumber : 33, className : "test.Test", methodName : "testAddCarry"});
-		this.assertEquals("15",qa._Arithmetic.Integer_Impl_.toString(qa._Arithmetic.Integer_Impl_.add(9,6)),{ fileName : "Test.hx", lineNumber : 34, className : "test.Test", methodName : "testAddCarry"});
-		this.assertEquals("16",qa._Arithmetic.Integer_Impl_.toString(qa._Arithmetic.Integer_Impl_.add(9,7)),{ fileName : "Test.hx", lineNumber : 35, className : "test.Test", methodName : "testAddCarry"});
-		this.assertEquals("17",qa._Arithmetic.Integer_Impl_.toString(qa._Arithmetic.Integer_Impl_.add(9,8)),{ fileName : "Test.hx", lineNumber : 36, className : "test.Test", methodName : "testAddCarry"});
-		this.assertEquals("18",qa._Arithmetic.Integer_Impl_.toString(qa._Arithmetic.Integer_Impl_.add(9,9)),{ fileName : "Test.hx", lineNumber : 37, className : "test.Test", methodName : "testAddCarry"});
+		this.assertEquals("10",qa.arithmetic._Arithmetic.Integer_Impl_.toString(qa.arithmetic._Arithmetic.Integer_Impl_.add(9,1)),{ fileName : "Test.hx", lineNumber : 30, className : "test.Test", methodName : "testAddCarry"});
+		this.assertEquals("11",qa.arithmetic._Arithmetic.Integer_Impl_.toString(qa.arithmetic._Arithmetic.Integer_Impl_.add(9,2)),{ fileName : "Test.hx", lineNumber : 31, className : "test.Test", methodName : "testAddCarry"});
+		this.assertEquals("12",qa.arithmetic._Arithmetic.Integer_Impl_.toString(qa.arithmetic._Arithmetic.Integer_Impl_.add(9,3)),{ fileName : "Test.hx", lineNumber : 32, className : "test.Test", methodName : "testAddCarry"});
+		this.assertEquals("13",qa.arithmetic._Arithmetic.Integer_Impl_.toString(qa.arithmetic._Arithmetic.Integer_Impl_.add(9,4)),{ fileName : "Test.hx", lineNumber : 33, className : "test.Test", methodName : "testAddCarry"});
+		this.assertEquals("14",qa.arithmetic._Arithmetic.Integer_Impl_.toString(qa.arithmetic._Arithmetic.Integer_Impl_.add(9,5)),{ fileName : "Test.hx", lineNumber : 34, className : "test.Test", methodName : "testAddCarry"});
+		this.assertEquals("15",qa.arithmetic._Arithmetic.Integer_Impl_.toString(qa.arithmetic._Arithmetic.Integer_Impl_.add(9,6)),{ fileName : "Test.hx", lineNumber : 35, className : "test.Test", methodName : "testAddCarry"});
+		this.assertEquals("16",qa.arithmetic._Arithmetic.Integer_Impl_.toString(qa.arithmetic._Arithmetic.Integer_Impl_.add(9,7)),{ fileName : "Test.hx", lineNumber : 36, className : "test.Test", methodName : "testAddCarry"});
+		this.assertEquals("17",qa.arithmetic._Arithmetic.Integer_Impl_.toString(qa.arithmetic._Arithmetic.Integer_Impl_.add(9,8)),{ fileName : "Test.hx", lineNumber : 37, className : "test.Test", methodName : "testAddCarry"});
+		this.assertEquals("18",qa.arithmetic._Arithmetic.Integer_Impl_.toString(qa.arithmetic._Arithmetic.Integer_Impl_.add(9,9)),{ fileName : "Test.hx", lineNumber : 38, className : "test.Test", methodName : "testAddCarry"});
 	}
 	,testAddOther: function() {
-		this.assertEquals("10",qa._Arithmetic.Integer_Impl_.toString(qa._Arithmetic.Integer_Impl_.add(0,10)),{ fileName : "Test.hx", lineNumber : 40, className : "test.Test", methodName : "testAddOther"});
-		this.assertEquals("11",qa._Arithmetic.Integer_Impl_.toString(qa._Arithmetic.Integer_Impl_.add(1,10)),{ fileName : "Test.hx", lineNumber : 41, className : "test.Test", methodName : "testAddOther"});
-		this.assertEquals("20",qa._Arithmetic.Integer_Impl_.toString(qa._Arithmetic.Integer_Impl_.add(10,10)),{ fileName : "Test.hx", lineNumber : 42, className : "test.Test", methodName : "testAddOther"});
-		this.assertEquals("21",qa._Arithmetic.Integer_Impl_.toString(qa._Arithmetic.Integer_Impl_.add(10,11)),{ fileName : "Test.hx", lineNumber : 43, className : "test.Test", methodName : "testAddOther"});
-		this.assertEquals("30",qa._Arithmetic.Integer_Impl_.toString(qa._Arithmetic.Integer_Impl_.add(11,19)),{ fileName : "Test.hx", lineNumber : 44, className : "test.Test", methodName : "testAddOther"});
-		this.assertEquals("111",qa._Arithmetic.Integer_Impl_.toString(qa._Arithmetic.Integer_Impl_.add(qa._Arithmetic.Integer_Impl_.add(1,10),100)),{ fileName : "Test.hx", lineNumber : 45, className : "test.Test", methodName : "testAddOther"});
+		this.assertEquals("10",qa.arithmetic._Arithmetic.Integer_Impl_.toString(qa.arithmetic._Arithmetic.Integer_Impl_.add(0,10)),{ fileName : "Test.hx", lineNumber : 41, className : "test.Test", methodName : "testAddOther"});
+		this.assertEquals("11",qa.arithmetic._Arithmetic.Integer_Impl_.toString(qa.arithmetic._Arithmetic.Integer_Impl_.add(1,10)),{ fileName : "Test.hx", lineNumber : 42, className : "test.Test", methodName : "testAddOther"});
+		this.assertEquals("20",qa.arithmetic._Arithmetic.Integer_Impl_.toString(qa.arithmetic._Arithmetic.Integer_Impl_.add(10,10)),{ fileName : "Test.hx", lineNumber : 43, className : "test.Test", methodName : "testAddOther"});
+		this.assertEquals("21",qa.arithmetic._Arithmetic.Integer_Impl_.toString(qa.arithmetic._Arithmetic.Integer_Impl_.add(10,11)),{ fileName : "Test.hx", lineNumber : 44, className : "test.Test", methodName : "testAddOther"});
+		this.assertEquals("30",qa.arithmetic._Arithmetic.Integer_Impl_.toString(qa.arithmetic._Arithmetic.Integer_Impl_.add(11,19)),{ fileName : "Test.hx", lineNumber : 45, className : "test.Test", methodName : "testAddOther"});
+		this.assertEquals("111",qa.arithmetic._Arithmetic.Integer_Impl_.toString(qa.arithmetic._Arithmetic.Integer_Impl_.add(qa.arithmetic._Arithmetic.Integer_Impl_.add(1,10),100)),{ fileName : "Test.hx", lineNumber : 46, className : "test.Test", methodName : "testAddOther"});
 	}
 	,__class__: test.Test
 });
@@ -2961,50 +2915,47 @@ Theme.normal = 4539717;
 Theme.disabled = 12566463;
 Theme.error = 12298535;
 byte._LittleEndianWriter.LittleEndianWriter_Impl_.LN2 = Math.log(2);
-hxmath._BigInt.BigInt_Impl_.BITS_PER_CHUNK = 30;
-hxmath._BigInt.BigInt_Impl_.CHUNK_MASK = 1073741823;
-hxmath._BigInt.BigInt_Impl_.CHUNK_MAX_FLOAT = 1073741824.;
-hxmath._BigInt.BigInt_Impl_.MUL_BITS = 15;
-hxmath._BigInt.BigInt_Impl_.MUL_MASK = 32767;
 hxparse.LexEngine.MAX_CODE = 255;
 hxparse.LexEngine.EMPTY = [];
 hxparse.LexEngine.ALL_CHARS = [{ min : 0, max : 255}];
-qa._Arithmetic.Real_Impl_.ZERO = 0;
-qa._Arithmetic.SimpleFraction_Impl_.ZERO = { a : 0, b : 0};
-qa._Arithmetic.Integer_Impl_.ZERO = 0;
-qa._Arithmetic.Integer_Impl_.ONE = 1;
-qa.ArithmeticLexer.tok = hxparse.Lexer.buildRuleset([{ rule : "0x[0-9a-fA-F]+", func : function(lexer) {
-	return qa.ArithmeticToken.TConst(qa.Constant.CInteger(qa._Arithmetic.Integer_Impl_.fromString(lexer.current),qa.NumberFormat.Hexadecimal));
+qa.arithmetic._Arithmetic.Integer_Impl_.ZERO = 0;
+qa.arithmetic._Arithmetic.Integer_Impl_.ONE = 1;
+qa.arithmetic._Arithmetic.Real_Impl_.ZERO = 0;
+qa.algebra.AlgebraLexer.tok = hxparse.Lexer.buildRuleset([{ rule : "0x[0-9a-fA-F]+", func : function(lexer) {
+	return qa.algebra.AlgebraToken.TSymbol(qa.algebra.Symbol.SConst(qa.algebra.Constant.CInteger(qa.arithmetic._Arithmetic.Integer_Impl_.fromString(lexer.current),qa.arithmetic.NumberFormat.Hexadecimal)));
 }},{ rule : "[0-9]+", func : function(lexer1) {
-	return qa.ArithmeticToken.TConst(qa.Constant.CInteger(qa._Arithmetic.Integer_Impl_.fromString(lexer1.current),qa.NumberFormat.Decimal));
+	return qa.algebra.AlgebraToken.TSymbol(qa.algebra.Symbol.SConst(qa.algebra.Constant.CInteger(qa.arithmetic._Arithmetic.Integer_Impl_.fromString(lexer1.current),qa.arithmetic.NumberFormat.Decimal)));
 }},{ rule : "[0-9]+\\.[0-9]+", func : function(lexer2) {
-	return qa.ArithmeticToken.TConst(qa.Constant.CReal(qa._Arithmetic.Real_Impl_.fromString(lexer2.current)));
+	return qa.algebra.AlgebraToken.TSymbol(qa.algebra.Symbol.SConst(qa.algebra.Constant.CReal(qa.arithmetic._Arithmetic.Real_Impl_.fromString(lexer2.current))));
 }},{ rule : "\\.[0-9]+", func : function(lexer3) {
-	return qa.ArithmeticToken.TConst(qa.Constant.CReal(qa._Arithmetic.Real_Impl_.fromString(lexer3.current)));
+	return qa.algebra.AlgebraToken.TSymbol(qa.algebra.Symbol.SConst(qa.algebra.Constant.CReal(qa.arithmetic._Arithmetic.Real_Impl_.fromString(lexer3.current))));
 }},{ rule : "[0-9]+[eE][\\+\\-]?[0-9]+", func : function(lexer4) {
-	return qa.ArithmeticToken.TConst(qa.Constant.CReal(qa._Arithmetic.Real_Impl_.fromString(lexer4.current)));
+	return qa.algebra.AlgebraToken.TSymbol(qa.algebra.Symbol.SConst(qa.algebra.Constant.CReal(qa.arithmetic._Arithmetic.Real_Impl_.fromString(lexer4.current))));
 }},{ rule : "[0-9]+\\.[0-9]*[eE][\\+\\-]?[0-9]+", func : function(lexer5) {
-	return qa.ArithmeticToken.TConst(qa.Constant.CReal(qa._Arithmetic.Real_Impl_.fromString(lexer5.current)));
-}},{ rule : "\\(", func : function(lexer6) {
-	return qa.ArithmeticToken.TPOpen;
-}},{ rule : "\\)", func : function(lexer7) {
-	return qa.ArithmeticToken.TPClose;
-}},{ rule : "\\+", func : function(lexer8) {
-	return qa.ArithmeticToken.TBinop(qa.ArithmeticBinop.OpAdd);
-}},{ rule : "\\-", func : function(lexer9) {
-	return qa.ArithmeticToken.TBinop(qa.ArithmeticBinop.OpSub);
-}},{ rule : "\\*", func : function(lexer10) {
-	return qa.ArithmeticToken.TBinop(qa.ArithmeticBinop.OpMul);
-}},{ rule : "\\/", func : function(lexer11) {
-	return qa.ArithmeticToken.TBinop(qa.ArithmeticBinop.OpDiv);
-}},{ rule : "\\^", func : function(lexer12) {
-	return qa.ArithmeticToken.TBinop(qa.ArithmeticBinop.OpPow);
-}},{ rule : "[\r\n\t ]", func : function(lexer13) {
-	return lexer13.token(qa.ArithmeticLexer.tok);
-}},{ rule : "", func : function(lexer14) {
-	return qa.ArithmeticToken.TEof;
+	return qa.algebra.AlgebraToken.TSymbol(qa.algebra.Symbol.SConst(qa.algebra.Constant.CReal(qa.arithmetic._Arithmetic.Real_Impl_.fromString(lexer5.current))));
+}},{ rule : "[a-z][a-zA-Z0-9_]*", func : function(lexer6) {
+	return qa.algebra.AlgebraToken.TSymbol(qa.algebra.Symbol.SVariable(lexer6.current));
+}},{ rule : "\\(", func : function(lexer7) {
+	return qa.algebra.AlgebraToken.TPOpen;
+}},{ rule : "\\)", func : function(lexer8) {
+	return qa.algebra.AlgebraToken.TPClose;
+}},{ rule : "\\+", func : function(lexer9) {
+	return qa.algebra.AlgebraToken.TBinop(qa.algebra.AlgebraBinop.OpAdd);
+}},{ rule : "\\-", func : function(lexer10) {
+	return qa.algebra.AlgebraToken.TBinop(qa.algebra.AlgebraBinop.OpSub);
+}},{ rule : "\\*", func : function(lexer11) {
+	return qa.algebra.AlgebraToken.TBinop(qa.algebra.AlgebraBinop.OpMul);
+}},{ rule : "\\/", func : function(lexer12) {
+	return qa.algebra.AlgebraToken.TBinop(qa.algebra.AlgebraBinop.OpDiv);
+}},{ rule : "\\^", func : function(lexer13) {
+	return qa.algebra.AlgebraToken.TBinop(qa.algebra.AlgebraBinop.OpPow);
+}},{ rule : "[\r\n\t ]", func : function(lexer14) {
+	return lexer14.token(qa.algebra.AlgebraLexer.tok);
+}},{ rule : "", func : function(lexer15) {
+	return qa.algebra.AlgebraToken.TEof;
 }}],"tok");
-qa.ArithmeticLexer.generatedRulesets = [qa.ArithmeticLexer.tok];
+qa.algebra.AlgebraLexer.generatedRulesets = [qa.algebra.AlgebraLexer.tok];
+qa.arithmetic._Arithmetic.SimpleFraction_Impl_.ZERO = { a : 0, b : 0};
 Know.main();
 })();
 
