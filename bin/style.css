@@ -2,6 +2,10 @@ body {
 	font-family: 'Roboto';
 	font-weight: 700;
 	margin: 10px;
+	-webkit-app-region: drag;
+}
+#input {
+	width: 400px;
 }
 #info {
 	font-weight: normal;

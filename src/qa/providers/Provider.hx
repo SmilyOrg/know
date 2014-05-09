@@ -1,5 +1,11 @@
 package qa.providers;
 import byte.ByteData;
+import haxe.macro.Expr.Position;
+import haxe.macro.Printer;
+import hscript.Expr;
+import hscript.Interp;
+import hscript.Macro;
+import hscript.Parser;
 import js.Browser;
 import qa.algebra.Algebra;
 import qa.algebra.Evaluation.AlgebraEvaluator;
@@ -45,8 +51,13 @@ class AlgebraParserProvider implements Provider {
 		
 		parser.reset();
 		
-		var expr = parser.parse();
-		return Item(expr, AlgebraPrinter.printTex(expr));
+		try {
+			var expr = parser.parse();
+			return Item(expr, AlgebraPrinter.printTex(expr));
+		} catch (e:Dynamic) {
+			return None;
+		}
+		
 	}
 }
 
@@ -145,6 +156,52 @@ class MathBoxProvider implements Provider {
 				untyped window[funcid] = f;
 				Item(null, '<div><iframe class="mathbox-frame" frameborder="0" id="$frameid" src="lib/mathbox.html"></iframe><script> var m = document.getElementById("$frameid"); m.onload = function() { this.contentWindow.$call } </script></div>');
 			case _: None;
+		}
+		
+	}
+}
+
+class HScriptParserProvider implements Provider {
+	
+	var parser = new hscript.Parser();
+	
+	public function new() {}
+	public function reset() {}
+	
+	public function query(item:Dynamic):Result {
+		if (Type.getClass(item) != String) return None;
+		
+		var str:String = item;
+		
+		try {
+			var ast = parser.parseString(str);
+			return Item(ast, new haxe.macro.Printer().printExpr(new hscript.Macro({ file: "<hscript>", min: 0, max: 0 }).convert(ast)));
+		} catch (e:hscript.Expr.Error) {
+			return None;
+		}
+		
+	}
+}
+
+class HScriptInterpProvider implements Provider {
+	
+	var interp = new hscript.Interp();
+	
+	public function new() {
+		interp.variables.set("Math", Math);
+	}
+	public function reset() {}
+	
+	public function query(item:Dynamic):Result {
+		if (Type.getEnum(item) != hscript.Expr) return None;
+		
+		var ast:hscript.Expr = item;
+		
+		try {
+			var result = interp.execute(ast);
+			return Item(result, ""+result);
+		} catch (e:hscript.Expr.Error) {
+			return None;
 		}
 		
 	}

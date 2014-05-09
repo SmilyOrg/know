@@ -66,7 +66,8 @@ class Know {
 		//input.val("1^2*3+4");
 		//input.val("x^2");
 		//input.val("1-2+x^2-3+4");
-		input.val("x^2+y^2");
+		//input.val("x^2+y^2");
+		input.val("var sum = 0; for (x in [1, 2, 3]) sum += x; sum;");
 		inputChange();
 		
 		var runner = new TestRunner();

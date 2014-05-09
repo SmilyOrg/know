@@ -21,6 +21,8 @@ class Ksi {
 	var providers = new List<Provider>();
 	
 	public function new() {
+		providers.add(new HScriptParserProvider());
+		providers.add(new HScriptInterpProvider());
 		providers.add(new AlgebraParserProvider());
 		providers.add(new AlgebraEvalProvider());
 		providers.add(new MathBoxProvider());
@@ -37,12 +39,12 @@ class Ksi {
 			provider.reset();
 		}
 		
-		for (i in 0...5) {
+		for (i in 0...10) {
 			trace("PENDING", pending);
 			var question = pending.pop();
 			var results = query(question);
 			//trace("QUESTION", question, "RESULTS", results);
-			if (results.length == 0) break;
+			if (pending.length == 0 && results.length == 0) break;
 			var resultAnswers = new Array<String>();
 			for (result in results) {
 				switch (result.result) {
@@ -91,10 +93,12 @@ class Ksi {
 	
 	public function query(item:Dynamic):Array<QueryResult> {
 		var results = [];
+		trace("Question "+item);
 		for (provider in providers) {
-			trace("Querying " + Type.getClassName(Type.getClass(provider)) + " with " + item);
 			var providerName = Type.getClassName(Type.getClass(provider));
+			trace(providerName);
 			var result = provider.query(item);
+			trace(result);
 			switch (result) {
 				case None:
 				case _: results.push({ provider: provider, result: result });
