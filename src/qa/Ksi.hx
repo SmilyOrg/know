@@ -3,26 +3,66 @@ import byte.ByteData;
 import qa.algebra.Parser;
 import qa.algebra.Algebra;
 import qa.algebra.Evaluation;
+import qa.providers.Provider;
 
 typedef Answer = {
 	question:String,
-	answer:String,
+	answers:Array<String>,
 	debug:String
+}
+
+typedef QueryResult = {
+	provider:Provider,
+	result:Result
 }
 
 class Ksi {
 	
-	var lexer:AlgebraLexer;
-	var parser:AlgebraParser;
+	var providers = new List<Provider>();
 	
 	public function new() {
-		lexer = new AlgebraLexer();
-		parser = new AlgebraParser(lexer, AlgebraLexer.tok);
+		providers.add(new AlgebraParserProvider());
+		providers.add(new AlgebraEvalProvider());
+		providers.add(new MathBoxProvider());
 	}
 	
-	public function answer(text:String):Answer {
-		var bytes = ByteData.ofString(text);
+	public function answer(text:String):Array<Answer> {
 		
+		var answers = new Array<Answer>();
+		
+		var pending = new List<Dynamic>();
+		pending.add(text);
+		
+		for (provider in providers) {
+			provider.reset();
+		}
+		
+		for (i in 0...5) {
+			trace("PENDING", pending);
+			var question = pending.pop();
+			var results = query(question);
+			//trace("QUESTION", question, "RESULTS", results);
+			if (results.length == 0) break;
+			var resultAnswers = new Array<String>();
+			for (result in results) {
+				switch (result.result) {
+					case Item(item, printed):
+						pending.add(item);
+						resultAnswers.push("<h3 class='provider-name'>"+Type.getClassName(Type.getClass(result.provider))+"</h3>"+printed);
+					case _:
+				}
+			}
+			answers.push({
+				question: ""+question,
+				answers: resultAnswers,
+				debug: "meh",
+			});
+		}
+		
+		return answers;
+		
+		/*
+		var bytes = ByteData.ofString(text);
 		var tokens = "";
 		lexer.reset(bytes);
 		var tok;
@@ -46,6 +86,21 @@ class Ksi {
 				"<h3>Parsing steps</h3>" +
 				"<div class='steps parser'>" + parser.steps.join("<br/>") + "</div>"
 		};
+		*/
+	}
+	
+	public function query(item:Dynamic):Array<QueryResult> {
+		var results = [];
+		for (provider in providers) {
+			trace("Querying " + Type.getClassName(Type.getClass(provider)) + " with " + item);
+			var providerName = Type.getClassName(Type.getClass(provider));
+			var result = provider.query(item);
+			switch (result) {
+				case None:
+				case _: results.push({ provider: provider, result: result });
+			}
+		}
+		return results;
 	}
 	
 }

@@ -2,6 +2,8 @@ package ;
 
 import haxe.unit.TestRunner;
 import hxparse.NoMatch;
+import js.Browser;
+import js.html.DivElement;
 import js.html.Element;
 import js.JQuery;
 import js.JQuery.JQueryHelper.J;
@@ -26,8 +28,7 @@ class Know {
 	var ksi:Ksi;
 	var input:JQuery;
 	var info:JQuery;
-	var outputQuestion:JQuery;
-	var outputAnswer:JQuery;
+	var output:JQuery;
 	var debug:JQuery;
 	
 	public function new() {
@@ -40,8 +41,7 @@ class Know {
 		
 		info = J("#info");
 		
-		outputQuestion = J("#question");
-		outputAnswer = J("#answer");
+		output = J("#output");
 		debug = J("#debug");
 		
 		//input.val("1/2*3");
@@ -62,8 +62,11 @@ class Know {
 		//input.val("1+1");
 		//input.val("1-2*3+3*2^5*5");
 		//input.val("1+2*3^4*5+6");
-		input.val("1+2*3^4*5+1*1-1+1");
+		//input.val("1+2*3^4*5+1*1-1+1");
 		//input.val("1^2*3+4");
+		//input.val("x^2");
+		//input.val("1-2+x^2-3+4");
+		input.val("x^2+y^2");
 		inputChange();
 		
 		var runner = new TestRunner();
@@ -81,24 +84,30 @@ class Know {
 	function inputChange(e:JqEvent = null) {
 		var question = input.val();
 		info.text("");
-		setColor(outputQuestion, Theme.disabled);
-		setColor(outputAnswer, Theme.disabled);
+		setColor(output, Theme.disabled);
 		if (question.length == 0) {
-			outputQuestion.text("");
-			outputAnswer.text("");
+			output.text("");
 			return;
 		}
 		try {
-			var answer = ksi.answer(question);
-			outputQuestion.html(answer.question);
-			outputAnswer.html(answer.answer);
-			debug.html(answer.debug);
-			setColor(outputQuestion, Theme.normal);
-			setColor(outputAnswer, Theme.normal);
+			var answers = ksi.answer(question);
+			output.html("");
+			for (answer in answers) {
+				//var elemQuestion = Browser.document.createDivElement();
+				//elemQuestion.innerHTML = answer.question;
+				//output.append(elemQuestion);
+				
+				var elemAnswers = J(Browser.document.createDivElement());
+				for (ans in answer.answers) {
+					var elemAnswer = Browser.document.createDivElement();
+					elemAnswer.innerHTML = ans;
+					elemAnswers.append(elemAnswer);
+				}
+				output.append(elemAnswers);
+			}
+			setColor(output, Theme.normal);
 			
-			typeset(outputQuestion[0]);
-			typeset(outputAnswer[0]);
-			typeset(debug[0]);
+			typeset(output[0]);
 			//typeset(J(".steps .eval")[0]);
 			
 		//} catch (e:NoMatch<Dynamic>) {

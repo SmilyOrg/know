@@ -12,7 +12,7 @@ enum MathExpression {
 	EBinop(op:AlgebraBinop, e1:MathExpression, e2:MathExpression);
 	EParenthesis(e:MathExpression);
 	ENeg(e:MathExpression);
-	//EPartial(e:MathExpression);
+	EPartial(e:MathExpression);
 }
 
 class Algebra {
@@ -98,6 +98,7 @@ class AlgebraPrinter {
 			case EBinop(_):             "binop";
 			case EParenthesis(_):       "paren";
 			case ENeg(_):               "neg";
+			case EPartial(_):           "partial";
 		});
 	}
 	
@@ -108,6 +109,7 @@ class AlgebraPrinter {
 				//"Eval " +
 				var expr = switch (e) {
 					//case EConst(c): 'constant ${printConstant(c)}';
+					case EPartial(e): printTexInline(e);
 					case ESymbol(SConst(c)): printConstant(c);
 					case ESymbol(SVariable(name)): name;
 					case EBinop(c, e1, e2): wrapTexInline(printTexMath(e, true));
@@ -147,6 +149,11 @@ class AlgebraPrinter {
 	}
 	static public function printTexMath(expr:MathExpression, highlightBinop:Bool = false):String {
 		return switch (expr) {
+			case EPartial(e):
+				//printTexMath(e);
+				'\\left<${printTexMath(e)}\\right>';
+				//'${printTexMath(e)}^{\\small{p}}';
+				//'\\underline{${printTexMath(e)}}';
 			case ESymbol(SConst(c)):
 				switch (c) {
 					case CInteger(n, format):
@@ -191,6 +198,7 @@ class AlgebraPrinter {
 	static private function wrapParens(e:MathExpression, pop:AlgebraBinop) {
 		e = escapeParens(e);
 		return switch (e) {
+			case EPartial(e): wrapParens(e, pop);
 			case EBinop(op, e1, e2):
 				pop.getPrecedenceRank() > op.getPrecedenceRank() ? EParenthesis(e) : e;
 			case ESymbol(SConst(_)): e;

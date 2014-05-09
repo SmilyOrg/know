@@ -1,6 +1,5 @@
 package qa.algebra;
 
-import haxe.macro.Expr;
 import qa.algebra.Algebra;
 import qa.arithmetic.Arithmetic;
 
@@ -21,6 +20,8 @@ typedef EvalStep = {
 class EvalState {
 	public var currentLevel:Int;
 	public var steps = new List<EvalStep>();
+	public var boundVars = new Map<String, Constant>();
+	public var evalPartial:Bool = false;
 	public function new() {}
 	public function addStep(type:EvalStepType) {
 		steps.add({ type: type, level: currentLevel });
@@ -29,17 +30,17 @@ class EvalState {
 
 class AlgebraEvaluator {
 	
-	/*
-	macro static public function evalConst(e:Expr) {
-		return macro eval($e, state);
-	}
-	*/
-	
-	static public inline function evalConst(e:MathExpression, state:EvalState) {
-		var result = eval(e, state);
-		//switch (result) {
-			//
-		//}
+	static public function accumulateVariables(e:MathExpression, vars:Array<String>) {
+		switch (e) {
+			case ESymbol(SVariable(name)):
+				vars.push(name);
+			case ESymbol(SConst(_)):
+			case EPartial(e), EParenthesis(e), ENeg(e):
+				accumulateVariables(e, vars);
+			case EBinop(_, e1, e2):
+				accumulateVariables(e1, vars);
+				accumulateVariables(e2, vars);
+		}
 	}
 	
 	static public function eval(e:MathExpression, state:EvalState):MathExpression {
@@ -50,11 +51,18 @@ class AlgebraEvaluator {
 		}
 		//state.addStep(Expression(e));
 		var result:MathExpression = switch(e) {
+			case EPartial(partial):
+				return state.evalPartial ? eval(partial, state) : e;
 			case ESymbol(SConst(c)):
 				e; 
-			case ESymbol(v = SVariable(_)):
-				state.addStep(UnknownSymbol(v));
-				e;
+			case ESymbol(v = SVariable(name)):
+				var bound = state.boundVars[name];
+				if (bound == null) {
+					state.addStep(UnknownSymbol(v));
+					e;
+				} else {
+					ESymbol(SConst(bound));
+				}
 			case EBinop(op, e1, e2):
 				switch [e1, e2] {
 					case [ESymbol(SConst(ca)), ESymbol(SConst(cb))]:
@@ -122,7 +130,7 @@ class AlgebraEvaluator {
 							case [ESymbol(SConst(a)), ESymbol(SConst(b))]:
 								eval(EBinop(op, ev1, ev2), state);
 							case _:
-								EBinop(op, ev1, ev2);
+								EPartial(EBinop(op, ev1, ev2));
 						}
 						
 				}

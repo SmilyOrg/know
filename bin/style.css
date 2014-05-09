@@ -8,6 +8,13 @@ body {
 	font-size: 0.9em;
 	color: #6B6B6B;
 }
+.mathbox-frame {
+	width: 800px;
+	height: 600px;
+}
+.provider-name {
+	font-size: 12px;
+}
 .tokens {
 	margin-top: 1em;
 }
