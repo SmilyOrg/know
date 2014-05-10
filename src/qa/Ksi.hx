@@ -3,6 +3,8 @@ import byte.ByteData;
 import qa.algebra.Parser;
 import qa.algebra.Algebra;
 import qa.algebra.Evaluation;
+import qa.providers.HScript;
+import qa.providers.Math;
 import qa.providers.Weather;
 import qa.providers.Provider;
 
@@ -129,6 +131,12 @@ class Ksi {
 		trace("Result: "+Type.getClassName(Type.getClass(q.provider))+' ${q.result}');
 		switch (q.result) {
 			case None:
+			case Error(msg):
+				onAnswer({
+					question: ""+q.question,
+					answers: ["<h3 class='provider-name'>"+Type.getClassName(Type.getClass(q.provider))+"</h3>"+msg],
+					debug: "meh",
+				});
 			case Item(item, printed):
 				pending.add(item);
 				onAnswer({

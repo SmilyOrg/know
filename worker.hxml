@@ -1,0 +1,4 @@
+-lib hscript
+-cp src
+-js bin/HScriptInterpWorker.js
+-main qa.providers.HScriptInterpWorker

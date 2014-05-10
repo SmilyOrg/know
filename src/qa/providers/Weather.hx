@@ -20,9 +20,10 @@ class OpenWeatherMapQuery extends Query {
 	override public function run() {
 		req = new Http(BASE_URL+location.urlEncode());
 		//req = new Http("http://localhost/weather.json");
-		Timer.delay(request, 500);
 		req.onData = onData;
 		req.onError = onError;
+		Timer.delay(request, 500);
+		//Timer.delay(request, 0);
 	}
 	function request() {
 		if (req != null) req.request();

@@ -41,7 +41,7 @@ class ValuePrinter {
 		return DateExtra.colloquialElapsedTime(Date.fromTime(((time:UInt):Float)*1000));
 	}
 	public static function printLocation(location:GeoLocation):String {
-		return '${location.name}, ${location.country}';
+		return location.name == "" ? location.country : '${location.name}, ${location.country}';
 	}
 	public static function printPosition(position:GeoPosition):String {
 		return '
@@ -142,6 +142,15 @@ typedef Wind = {
 }
 
 typedef Value = Float;
+
+enum Unit {
+	Meter;
+}
+
+typedef Measurement = {
+	var value:Value;
+	var unit:Unit;
+}
 
 abstract MeasurementTime<T>(T) from T to T {}
 abstract Temperature<T>(T) from T to T {}
