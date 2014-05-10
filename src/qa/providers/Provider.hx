@@ -12,15 +12,35 @@ import qa.algebra.Evaluation.AlgebraEvaluator;
 import qa.algebra.Evaluation.EvalState;
 import qa.algebra.Parser.AlgebraLexer;
 import qa.algebra.Parser.AlgebraParser;
+import qa.providers.Provider.Query;
+import qa.providers.Provider.Result;
 
 enum Result {
 	None;
 	Item(item:Dynamic, printed:String);
 }
 
+class Query {
+	public var question:Dynamic;
+	public var provider:Provider;
+	public var result:Result;
+	public function run() {}
+	public function cancel() {}
+	dynamic public function onResult(q:Query) {};
+}
+
+class StaticQuery extends Query {
+	public function new(result:Result) {
+		this.result = result;
+	}
+	override public function run() {
+		onResult(this);
+	}
+}
+
 interface Provider {
 	function reset():Void;
-	function query(item:Dynamic):Result;
+	function query(item:Dynamic):Query;
 }
 
 class AlgebraParserProvider implements Provider {
@@ -37,8 +57,8 @@ class AlgebraParserProvider implements Provider {
 	
 	public function reset() {}
 	
-	public function query(item:Dynamic):Result {
-		if (Type.getClass(item) != String) return None;
+	public function query(item:Dynamic):Query {
+		if (Type.getClass(item) != String) return new StaticQuery(None);
 		
 		var bytes = ByteData.ofString(item);
 		
@@ -53,9 +73,9 @@ class AlgebraParserProvider implements Provider {
 		
 		try {
 			var expr = parser.parse();
-			return Item(expr, AlgebraPrinter.printTex(expr));
+			return new StaticQuery(Item(expr, AlgebraPrinter.printTex(expr)));
 		} catch (e:Dynamic) {
-			return None;
+			return new StaticQuery(None);
 		}
 		
 	}
@@ -68,17 +88,17 @@ class AlgebraEvalProvider implements Provider {
 	
 	public function reset() {}
 	
-	public function query(item:Dynamic):Result {
-		if (Type.getEnum(item) != MathExpression) return None;
+	public function query(item:Dynamic):Query {
+		if (Type.getEnum(item) != MathExpression) return new StaticQuery(None);
 		
 		var expr:MathExpression = item;
-		return switch (expr) {
+		return new StaticQuery(switch (expr) {
 			case EPartial(_), ESymbol(_): None;
 			case _:
 				var evalState = new EvalState();
 				var answer = AlgebraEvaluator.eval(expr, evalState);
 				Item(answer, AlgebraPrinter.printTex(answer));
-		}
+		});
 		
 	}
 }
@@ -95,11 +115,11 @@ class MathBoxProvider implements Provider {
 		queries = 0;
 	}
 	
-	public function query(item:Dynamic):Result {
-		if (Type.getEnum(item) != MathExpression) return None;
+	public function query(item:Dynamic):Query {
+		if (Type.getEnum(item) != MathExpression) return new StaticQuery(None);
 		
 		var expr:MathExpression = item;
-		return switch (expr) {
+		return new StaticQuery(switch (expr) {
 			case EPartial(_):
 				var id = queries++;
 				
@@ -156,7 +176,7 @@ class MathBoxProvider implements Provider {
 				untyped window[funcid] = f;
 				Item(null, '<div><iframe class="mathbox-frame" frameborder="0" id="$frameid" src="lib/mathbox.html"></iframe><script> var m = document.getElementById("$frameid"); m.onload = function() { this.contentWindow.$call } </script></div>');
 			case _: None;
-		}
+		});
 		
 	}
 }
@@ -168,16 +188,16 @@ class HScriptParserProvider implements Provider {
 	public function new() {}
 	public function reset() {}
 	
-	public function query(item:Dynamic):Result {
-		if (Type.getClass(item) != String) return None;
+	public function query(item:Dynamic):Query {
+		if (Type.getClass(item) != String) return new StaticQuery(None);
 		
 		var str:String = item;
 		
 		try {
 			var ast = parser.parseString(str);
-			return Item(ast, new haxe.macro.Printer().printExpr(new hscript.Macro({ file: "<hscript>", min: 0, max: 0 }).convert(ast)));
+			return new StaticQuery(Item(ast, new haxe.macro.Printer().printExpr(new hscript.Macro({ file: "<hscript>", min: 0, max: 0 }).convert(ast))));
 		} catch (e:hscript.Expr.Error) {
-			return None;
+			return new StaticQuery(None);
 		}
 		
 	}
@@ -192,16 +212,16 @@ class HScriptInterpProvider implements Provider {
 	}
 	public function reset() {}
 	
-	public function query(item:Dynamic):Result {
-		if (Type.getEnum(item) != hscript.Expr) return None;
+	public function query(item:Dynamic):Query {
+		if (Type.getEnum(item) != hscript.Expr) return new StaticQuery(None);
 		
 		var ast:hscript.Expr = item;
 		
 		try {
 			var result = interp.execute(ast);
-			return Item(result, ""+result);
+			return new StaticQuery(Item(result, ""+result));
 		} catch (e:hscript.Expr.Error) {
-			return None;
+			return new StaticQuery(None);
 		}
 		
 	}

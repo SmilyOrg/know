@@ -3,6 +3,7 @@ import byte.ByteData;
 import qa.algebra.Parser;
 import qa.algebra.Algebra;
 import qa.algebra.Evaluation;
+import qa.providers.Weather;
 import qa.providers.Provider;
 
 typedef Answer = {
@@ -13,12 +14,15 @@ typedef Answer = {
 
 typedef QueryResult = {
 	provider:Provider,
-	result:Result
+	query:Query
 }
 
 class Ksi {
 	
 	var providers = new List<Provider>();
+	var pending = new List<Dynamic>();
+	var answerCount:Int;
+	var pendingQueries = new Array<Query>();
 	
 	public function new() {
 		providers.add(new HScriptParserProvider());
@@ -26,42 +30,59 @@ class Ksi {
 		providers.add(new AlgebraParserProvider());
 		providers.add(new AlgebraEvalProvider());
 		providers.add(new MathBoxProvider());
+		providers.add(new OpenWeatherMapProvider());
+		providers.add(new WeatherReportDisplayProvider());
 	}
 	
-	public function answer(text:String):Array<Answer> {
+	dynamic public function onAnswer(answer:Answer) {}
+	
+	public function answer(text:String) {
 		
-		var answers = new Array<Answer>();
+		//var answers = new Array<Answer>();
 		
-		var pending = new List<Dynamic>();
-		pending.add(text);
+		answerCount = 0;
 		
 		for (provider in providers) {
 			provider.reset();
 		}
 		
-		for (i in 0...10) {
-			trace("PENDING", pending);
-			var question = pending.pop();
-			var results = query(question);
-			//trace("QUESTION", question, "RESULTS", results);
-			if (pending.length == 0 && results.length == 0) break;
-			var resultAnswers = new Array<String>();
-			for (result in results) {
+		while (pendingQueries.length > 0) {
+			pendingQueries.pop().cancel();
+		}
+		
+		pending.clear();
+		pending.add(text);
+		
+		answerNext();
+		
+		//for (i in 0...10) {
+		//
+			//trace("PENDING", pending);
+			//var question = pending.pop();
+			//var results = query(question);
+			////trace("QUESTION", question, "RESULTS", results);
+			//if (pending.length == 0 && results.length == 0) break;
+			//var resultAnswers = new Array<String>();
+			//for (result in results) {
+				/*
 				switch (result.result) {
 					case Item(item, printed):
 						pending.add(item);
 						resultAnswers.push("<h3 class='provider-name'>"+Type.getClassName(Type.getClass(result.provider))+"</h3>"+printed);
 					case _:
 				}
-			}
-			answers.push({
-				question: ""+question,
-				answers: resultAnswers,
-				debug: "meh",
-			});
-		}
+				*/
+				//result.query.onResult = queryResult;
+				//result.query.run();
+			//}
+			//answers.push({
+				//question: ""+question,
+				//answers: resultAnswers,
+				//debug: "meh",
+			//});
+		//}
 		
-		return answers;
+		//return answers;
 		
 		/*
 		var bytes = ByteData.ofString(text);
@@ -91,18 +112,52 @@ class Ksi {
 		*/
 	}
 	
-	public function query(item:Dynamic):Array<QueryResult> {
+	function answerNext() {
+		if (answerCount++ > 10) return;
+		var question = pending.pop();
+		var queries = query(question);
+		//if (pending.length == 0 && results.length == 0) break;
+		for (q in queries) {
+			pendingQueries.push(q);
+			q.onResult = queryResult;
+			q.run();
+		}
+	}
+	
+	function queryResult(q:Query) {
+		pendingQueries.remove(q);
+		trace("Result: "+Type.getClassName(Type.getClass(q.provider))+' ${q.result}');
+		switch (q.result) {
+			case None:
+			case Item(item, printed):
+				pending.add(item);
+				onAnswer({
+					question: ""+q.question,
+					answers: ["<h3 class='provider-name'>"+Type.getClassName(Type.getClass(q.provider))+"</h3>"+printed],
+					debug: "meh",
+				});
+				answerNext();
+		}
+	}
+	
+	public function query(item:Dynamic):Array<Query> {
 		var results = [];
-		trace("Question "+item);
+		//trace("Question "+item);
 		for (provider in providers) {
 			var providerName = Type.getClassName(Type.getClass(provider));
-			trace(providerName);
+			//trace(providerName);
+			/*
 			var result = provider.query(item);
 			trace(result);
 			switch (result) {
 				case None:
 				case _: results.push({ provider: provider, result: result });
 			}
+			*/
+			var query = provider.query(item);
+			query.provider = provider;
+			query.question = item;
+			results.push(query);
 		}
 		return results;
 	}

@@ -1,0 +1,21 @@
+body{font-family:'Roboto';font-weight:700;margin:10px;-webkit-app-region:drag;}
+#input{width:400px;}
+#info{font-weight:normal;font-size:0.9em;color:#6B6B6B;}
+.info-tag,.info-tag dl{display:block;background-color:#E7E7E7;margin:0;}
+.info-tag dt,.info-tag dd{display:inline-block;margin:4px;vertical-align:middle;}
+.info-tag dt{width:150px;color:#9C9898;}
+.info-tag dd{}
+.info-tag-weather i{font-size:50px;margin-right:20px;}
+.mathbox-frame{width:800px;height:600px;}
+.provider-name{font-size:12px;}
+.tokens{margin-top:1em;}
+.step{padding:4px;}
+.steps{margin-bottom:3em;}
+.indent{width:4em;}
+.tag{font-size:13px;background-color:#B3B3B3;color:white;padding:2px 6px;border-radius:6px;font-weight:normal;margin:4px 8px;}
+.tag-result{background-color:#14BA10;}
+.tag-promoted{background-color:#066299;}
+.tag-const{background-color:#D3D3D3;}
+.tag-binop{background-color:#E4A950;}
+.tag-paren{background-color:#E5E5E5;}
+.tag-neg{background-color:#F75B5B;}

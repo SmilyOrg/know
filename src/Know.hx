@@ -30,9 +30,11 @@ class Know {
 	var info:JQuery;
 	var output:JQuery;
 	var debug:JQuery;
+	var answers:JQuery;
 	
 	public function new() {
 		ksi = new Ksi();
+		ksi.onAnswer = onAnswer;
 		
 		// TODO sigma.js to display parsed graph, mathbox to show functions, mathjax
 		
@@ -67,7 +69,8 @@ class Know {
 		//input.val("x^2");
 		//input.val("1-2+x^2-3+4");
 		//input.val("x^2+y^2");
-		input.val("var sum = 0; for (x in [1, 2, 3]) sum += x; sum;");
+		//input.val("var sum = 0; for (x in [1, 2, 3]) sum += x; sum;");
+		input.val("weather ljubljana");
 		inputChange();
 		
 		var runner = new TestRunner();
@@ -91,7 +94,15 @@ class Know {
 			return;
 		}
 		try {
-			var answers = ksi.answer(question);
+			output.html("");
+			
+			answers = J(Browser.document.createDivElement());
+			output.append(answers);
+			
+			ksi.answer(question);
+			
+			
+			/*
 			output.html("");
 			for (answer in answers) {
 				//var elemQuestion = Browser.document.createDivElement();
@@ -109,6 +120,7 @@ class Know {
 			setColor(output, Theme.normal);
 			
 			typeset(output[0]);
+			*/
 			//typeset(J(".steps .eval")[0]);
 			
 		//} catch (e:NoMatch<Dynamic>) {
@@ -117,6 +129,18 @@ class Know {
 			//errstr.replace("\n", "<br/>");
 			info.text("Error: "+e);
 		}
+	}
+	
+	function onAnswer(answer:Answer) {
+		var results = J(Browser.document.createDivElement());
+		for (ans in answer.answers) {
+			var result = Browser.document.createDivElement();
+			result.innerHTML = ans;
+			setColor(J(result), Theme.normal);
+			typeset(result);
+			results.append(result);
+		}
+		answers.append(results);
 	}
 	
 	function typeset(element:Element) {

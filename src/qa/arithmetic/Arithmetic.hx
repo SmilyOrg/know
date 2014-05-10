@@ -22,9 +22,9 @@ abstract Real(Float) from Float to Float {
 	public static inline var ZERO:Real = (0:Float);
 	
 	@:from static public function fromString(s:String):Real {
-		var n:Float = Std.parseFloat(s);
-		//var n:Float = 0; throw "fix";
-		if (Math.isNaN(n)) throw "Unable to convert from String to Float: "+s;
+		//var n:Float = Std.parseFloat(s);
+		var n:Float = 0; throw "fix";
+		//if (Math.isNaN(n)) throw "Unable to convert from String to Float: "+s;
 		return cast(n, Real);
 	}
 	
@@ -197,8 +197,8 @@ abstract Integer(Int) from Int to Int {
 	public static inline var ONE:Integer = (1:Integer);
 	
 	@:from static public function fromString(s:String):Integer {
-		var n:Null<Int> = Std.parseInt(s);
-		//var n:Null<Int> = 0; throw "fix";
+		//var n:Null<Int> = Std.parseInt(s);
+		var n:Null<Int> = 0; throw "fix";
 		if (n == null) throw "Unable to convert from String to Integer: "+s;
 		var t:Int = n;
 		return cast(t, Integer);
