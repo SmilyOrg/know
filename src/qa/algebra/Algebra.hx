@@ -22,27 +22,29 @@ class Algebra {
 			case OpAdd:        0;
 			case OpSub:        1;
 			//case OpAdd, OpSub: 0;
-			case OpMul, OpDiv: 2;
-			case OpPow:        3;
+			case OpMul:        2;
+			case OpDiv:        3;
+			//case OpMul, OpDiv: 2;
+			case OpPow:        4;
 		}
 	}
 	
 	public static function getConstantRank(c:Constant) {
 		return switch (c) {
-			case CInteger(_, _):  0;
-			case CRational(_): 1;
-			case CReal(_):     2;
+			case CInteger(_, _): 0;
+			case CRational(_):   1;
+			case CReal(_):       2;
 		}
 	}
 	
-	public static function changeRank(c:Constant, base:Constant, state:EvalState):Constant {
+	public static function changeRank(c:Constant, base:Constant, state:EvalState = null):Constant {
 		var rb = getConstantRank(base);
 		
 		var rc = getConstantRank(c);
 		while (rc != rb) {
 			if (rc < rb) {
 				var p = promoteConst(c);
-				state.addStep(Promote(c, p));
+				if (state != null) state.addStep(Promote(c, p));
 				c = p;
 			} else {
 				throw 'Constant demotion not supported';

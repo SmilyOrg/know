@@ -28,7 +28,7 @@ class Ksi {
 	
 	public function new() {
 		providers.add(new HScriptParserProvider());
-		providers.add(new HScriptInterpProvider());
+		providers.add(new HScriptInterpProvider(false));
 		providers.add(new AlgebraParserProvider());
 		providers.add(new AlgebraEvalProvider());
 		providers.add(new MathBoxProvider());

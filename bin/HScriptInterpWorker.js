@@ -1690,6 +1690,19 @@ qa.providers.HScriptInterpWorker = function() {
 };
 $hxClasses["qa.providers.HScriptInterpWorker"] = qa.providers.HScriptInterpWorker;
 qa.providers.HScriptInterpWorker.__name__ = ["qa","providers","HScriptInterpWorker"];
+qa.providers.HScriptInterpWorker.interpret = function(expr) {
+	var interp = new hscript.Interp();
+	var result;
+	try {
+		var interpResult = interp.execute(expr);
+		result = qa.providers.Result.Item(interpResult,"" + interpResult);
+	} catch( e ) {
+		if( js.Boot.__instanceof(e,hscript.Error) ) {
+			result = qa.providers.Result.Error("HScript interpreter error: " + Std.string(e));
+		} else throw(e);
+	}
+	return result;
+};
 qa.providers.HScriptInterpWorker.main = function() {
 	WorkerScript["export"](new qa.providers.HScriptInterpWorker());
 };
@@ -1697,16 +1710,7 @@ qa.providers.HScriptInterpWorker.__super__ = WorkerScript;
 qa.providers.HScriptInterpWorker.prototype = $extend(WorkerScript.prototype,{
 	onMessage: function(e) {
 		var expr = haxe.Unserializer.run(e.data);
-		var interp = new hscript.Interp();
-		var result;
-		try {
-			var interpResult = interp.execute(expr);
-			result = qa.providers.Result.Item(interpResult,"" + interpResult);
-		} catch( e1 ) {
-			if( js.Boot.__instanceof(e1,hscript.Error) ) {
-				result = qa.providers.Result.Error("HScript interpreter error: " + Std.string(e1));
-			} else throw(e1);
-		}
+		var result = qa.providers.HScriptInterpWorker.interpret(expr);
 		this.postMessage(haxe.Serializer.run(result));
 	}
 	,__class__: qa.providers.HScriptInterpWorker

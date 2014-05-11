@@ -8,7 +8,8 @@ import js.html.Element;
 import js.JQuery;
 import js.JQuery.JQueryHelper.J;
 import js.Lib;
-import test.Test;
+import test.TestAlgebra;
+import test.TestArithmetic;
 
 import qa.Ksi;
 
@@ -46,7 +47,7 @@ class Know {
 		output = J("#output");
 		debug = J("#debug");
 		
-		//input.val("1/2*3");
+		input.val("1/2*3");
 		//input.val("1+10");
 		//input.val("0xFF");
 		//input.val("1/2");
@@ -70,12 +71,13 @@ class Know {
 		//input.val("1-2+x^2-3+4");
 		//input.val("x^2+y^2");
 		//input.val("(3/4)/(5/6)*0.1");
-		input.val("sum = 0; for (x in [1, 2, 3]) sum += x; sum;");
+		//input.val("sum = 0; for (x in [1, 2, 3]) sum += x; sum;");
 		//input.val("weather ljubljana");
 		inputChange();
 		
 		var runner = new TestRunner();
-		runner.add(new Test());
+		runner.add(new TestArithmetic());
+		runner.add(new TestAlgebra());
 		runner.run();
 		var tests = J("#tests");
 		tests.text(""+runner.result);

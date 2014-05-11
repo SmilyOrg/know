@@ -30,18 +30,23 @@ class HScriptParserProvider implements Provider {
 
 class HScriptInterpProvider implements Provider {
 	
-	var interp = new hscript.Interp();
-	
-	public function new() {
-		interp.variables.set("Math", Math);
+	var synchronous:Bool;
+	public function new(synchronous:Bool) {
+		this.synchronous = synchronous;
 	}
+	
 	public function reset() {}
 	
 	public function query(item:Dynamic):Query {
 		if (Type.getEnum(item) != hscript.Expr) return new StaticQuery(None);
 		
-		var ast:hscript.Expr = item;
-		return new HScriptInterpQuery(ast);
+		var expr:hscript.Expr = item;
+		
+		if (synchronous) {
+			return new StaticQuery(HScriptInterpWorker.interpret(expr));
+		} else {
+			return new HScriptInterpQuery(expr);
+		}
 		
 		/*
 		try {

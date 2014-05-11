@@ -3,7 +3,7 @@ import haxe.unit.TestCase;
 
 import qa.arithmetic.Arithmetic;
 
-class Test extends TestCase {
+class TestArithmetic extends TestCase {
 	public function testAddZero() {
 		assertEquals("0", (0:Integer)+(0:Integer));
 		assertEquals("1", (0:Integer)+(1:Integer));
