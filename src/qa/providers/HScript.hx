@@ -20,7 +20,8 @@ class HScriptParserProvider implements Provider {
 		
 		try {
 			var ast = parser.parseString(str);
-			return new StaticQuery(Item(ast, new haxe.macro.Printer().printExpr(new hscript.Macro({ file: "<hscript>", min: 0, max: 0 }).convert(ast))));
+			var printed = new haxe.macro.Printer().printExpr(new hscript.Macro({ file: "<hscript>", min: 0, max: 0 }).convert(ast));
+			return new StaticQuery(Item(ast, new SimpleDisplay(printed)));
 		} catch (e:hscript.Expr.Error) {
 			return new StaticQuery(None);
 		}

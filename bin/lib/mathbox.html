@@ -633,6 +633,8 @@ var mathboxScript = [
 			labels: true,
 		})
 		
+		window.dispatchEvent(new Event("mathboxReady"));
+		
 		/*
 		mathbox.curve({
 			id: 'my-curve',
@@ -645,28 +647,47 @@ var mathboxScript = [
 	
 	//var pending = null;
 	function showFunction2D(id, f) {
-		console.log("showFunction2D");
-		console.log(f);
-		window.mathbox.curve({
-			id: id,
+		showFunction(id, f, "curve", {
 			domain: [-3, 3],
-			expression: f,
 		});
+		var cam = window.mathbox.select("camera")[0].controls;
+		cam.phi = Math.PI/2;
+		cam.theta = 0;
 	}
 	function showFunction3D(id, f) {
-		console.log("showFunction3D");
-		console.log(f);
-		window.mathbox.surface({
+		showFunction(id, f, "surface", {
 			n: [ 32, 32 ],                         // Number of points in each direction
 			domain: [[-1, 1], [-1, 1]],              // X/Y Input domain
-			expression: f,
 			points: false,                         // Whether to draw points
-			line: false,                           // Whether to draw wireframe lines
-			mesh: true,                            // Whether to draw a solid mesh
+			line: true,                           // Whether to draw wireframe lines
+			mesh: false,                            // Whether to draw a solid mesh
 			doubleSided: true,                     // Whether the mesh is double sided
 			flipSided: false,                      // Whether to flip a single sided mesh
-			shaded: true,                          // Whether to shade the surface
-		})
+			shaded: false,                          // Whether to shade the surface
+		});
+	}
+	function showFunction(id, f, prim, props) {
+		var m = window.mathbox;
+		var hid = "#"+id;
+		var exists = true;
+		var existing = m.select(hid);
+		if (existing.length == 0) {
+			exists = false;
+		} else {
+			var primitive = existing[0];
+			if (prim == "curve" && !(primitive instanceof MathBox.Curve)) exists = false;
+			if (prim == "surface" && !(primitive instanceof MathBox.Surface)) exists = false;
+			if (!exists) m.remove(primitive);
+		}
+		if (!exists) {
+			props.id = id;
+			props.expression = f;
+			window.mathbox[prim](props);
+		} else {
+			m.animate(hid, {
+				expression: f
+			});
+		}
 	}
 	
 </script>

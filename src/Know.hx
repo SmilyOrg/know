@@ -8,6 +8,7 @@ import js.html.Element;
 import js.JQuery;
 import js.JQuery.JQueryHelper.J;
 import js.Lib;
+import qa.providers.Provider;
 import test.TestAlgebra;
 import test.TestArithmetic;
 
@@ -36,6 +37,7 @@ class Know {
 	public function new() {
 		ksi = new Ksi();
 		ksi.onAnswer = onAnswer;
+		ksi.onFinish = onFinish;
 		
 		// TODO sigma.js to display parsed graph, mathbox to show functions, mathjax
 		
@@ -46,8 +48,9 @@ class Know {
 		
 		output = J("#output");
 		debug = J("#debug");
+		answers = J("#answers");
 		
-		input.val("1/2*3");
+		//input.val("1/2*3");
 		//input.val("1+10");
 		//input.val("0xFF");
 		//input.val("1/2");
@@ -67,7 +70,8 @@ class Know {
 		//input.val("1+2*3^4*5+6");
 		//input.val("1+2*3^4*5+1*1-1+1");
 		//input.val("1^2*3+4");
-		//input.val("x^2");
+		input.val("x^2");
+		//input.val("-x^2");
 		//input.val("1-2+x^2-3+4");
 		//input.val("x^2+y^2");
 		//input.val("(3/4)/(5/6)*0.1");
@@ -93,17 +97,17 @@ class Know {
 		info.text("");
 		setColor(output, Theme.disabled);
 		if (question.length == 0) {
-			output.text("");
+			answers.text("");
 			return;
 		}
 		try {
-			output.html("");
+			//output.html("");
+			//
+			//answers = J(Browser.document.createDivElement());
+			//output.append(answers);
 			
-			answers = J(Browser.document.createDivElement());
-			output.append(answers);
-			
+			answers.children().addClass("outdated");
 			ksi.answer(question);
-			
 			
 			/*
 			output.html("");
@@ -135,15 +139,30 @@ class Know {
 	}
 	
 	function onAnswer(answer:Answer) {
-		var results = J(Browser.document.createDivElement());
-		for (ans in answer.answers) {
-			var result = Browser.document.createDivElement();
-			result.innerHTML = ans;
-			setColor(J(result), Theme.normal);
-			typeset(result);
-			results.append(result);
+		if (answer.display.provider == null) throw "what" + answer.display;
+		var result = getResultElement(answer.display.provider);
+		answer.display.apply(result);
+		setColor(J(result), Theme.normal);
+		typeset(result);
+	}
+	
+	function onFinish() {
+		//answers.children(".outdated").remove();
+	}
+	
+	function getResultElement(provider:Provider):Element {
+		var name = Type.getClassName(Type.getClass(provider));
+		var id = ~/([a-z])([A-Z])/g.replace(name, "$1-$2").replace(".", "-").toLowerCase();
+		var existing = answers.children('.$id.outdated');
+		var result:Element;
+		if (existing.length > 0) {
+			result = existing.first().removeClass("outdated")[0];
+		} else {
+			result = Browser.document.createDivElement();
+			result.classList.add(id);
+			answers.append(result);
 		}
-		answers.append(results);
+		return result;
 	}
 	
 	function typeset(element:Element) {

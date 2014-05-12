@@ -72,7 +72,7 @@ class OpenWeatherMapQuery extends Query {
 				});
 			}
 		}
-		return Item(r, data);
+		return Item(r, new SimpleDisplay(data));
 	}
 	function cleanup() {
 		if (req == null) return;
@@ -167,7 +167,7 @@ class WeatherReportDisplayProvider implements Provider {
 		
 		var report:WeatherReport = item;
 		
-		return new StaticQuery(Item(null, WeatherPrinter.printReport(report)));
+		return new StaticQuery(Item(null, new SimpleDisplay(WeatherPrinter.printReport(report))));
 	}
 	
 }

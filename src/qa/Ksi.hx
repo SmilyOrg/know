@@ -10,7 +10,7 @@ import qa.providers.Provider;
 
 typedef Answer = {
 	question:String,
-	answers:Array<String>,
+	display:Display,
 	debug:String
 }
 
@@ -37,6 +37,7 @@ class Ksi {
 	}
 	
 	dynamic public function onAnswer(answer:Answer) {}
+	dynamic public function onFinish() {}
 	
 	public function answer(text:String) {
 		
@@ -128,24 +129,29 @@ class Ksi {
 	
 	function queryResult(q:Query) {
 		pendingQueries.remove(q);
-		trace("Result: "+Type.getClassName(Type.getClass(q.provider))+' ${q.result}');
+		//trace("Result: "+Type.getClassName(Type.getClass(q.provider))+' ${q.result}');
 		switch (q.result) {
 			case None:
 			case Error(msg):
-				onAnswer({
-					question: ""+q.question,
-					answers: ["<h3 class='provider-name'>"+Type.getClassName(Type.getClass(q.provider))+"</h3>"+msg],
-					debug: "meh",
-				});
-			case Item(item, printed):
+				var display = new SimpleDisplay("<h3 class='provider-name'>"+Type.getClassName(Type.getClass(q.provider))+"</h3>"+msg);
+				queryResultDisplay(q, display);
+			case Item(item, display):
 				pending.add(item);
-				onAnswer({
-					question: ""+q.question,
-					answers: ["<h3 class='provider-name'>"+Type.getClassName(Type.getClass(q.provider))+"</h3>"+printed],
-					debug: "meh",
-				});
+				queryResultDisplay(q, display);
 				answerNext();
 		}
+		if (pendingQueries.length == 0) {
+			onFinish();
+		}
+	}
+	
+	function queryResultDisplay(q:Query, display:Display) {
+		display.provider = q.provider;
+		onAnswer({
+			question: ""+q.question,
+			display: display,
+			debug: "meh",
+		});
 	}
 	
 	public function query(item:Dynamic):Array<Query> {

@@ -108,7 +108,11 @@ class AlgebraParser extends hxparse.Parser<AlgebraLexer, AlgebraToken> implement
 		step('B $op');
 		step(AlgebraPrinter.printTexInline(e1));
 		step(AlgebraPrinter.printTexInline(e2));
+		// OpPow,ENeg(ESymbol(SVariable(x))),ESymbol(SConst(CInteger(2,Decimal))) 
+		//trace(op, e1, e2);
 		var ret = switch [e1, e2] {
+			case [ENeg(en), _] if (op.match(OpPow)):
+				ENeg(EBinop(OpPow, en, e2));
 			case [_, EBinop(e2op, e21, e22)] if (op.getPrecedenceRank() > e2op.getPrecedenceRank()):
 			//case [EBinop(e1op, e11, e12), EBinop(e2op, e21, e22)] if (op.getPrecedenceRank() > e2op.getPrecedenceRank()):
 				//step('binopswitch e1=$e1 op=$op e2=$e2 op2=$op2 e3=$e3 e4=$e4');

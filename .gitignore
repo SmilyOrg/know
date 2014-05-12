@@ -3,3 +3,4 @@ bin/know.js.map
 bin/style.min.css
 src/Version.hx
 updatePages.bat
+bin/HScriptInterpWorker.js

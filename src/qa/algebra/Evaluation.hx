@@ -33,7 +33,7 @@ class AlgebraEvaluator {
 	static public function accumulateVariables(e:MathExpression, vars:Array<String>) {
 		switch (e) {
 			case ESymbol(SVariable(name)):
-				vars.push(name);
+				if (vars.indexOf(name) == -1) vars.push(name);
 			case ESymbol(SConst(_)):
 			case EPartial(e), EParenthesis(e), ENeg(e):
 				accumulateVariables(e, vars);
@@ -147,7 +147,14 @@ class AlgebraEvaluator {
 					case _:
 						if (e.match(ESymbol(SConst(_)))) throw 'Unimplemented negation $e';
 						//eval(ENeg(ESymbol(SConst(eval(e, state)))), state);
-						eval(ENeg(eval(e, state)), state);
+						//trace(e, state.boundVars);
+						var ev = eval(e, state);
+						switch (ev) {
+							case ESymbol(SConst(c)):
+								eval(ENeg(ev), state);
+							case _:
+								EPartial(ENeg(ev));
+						}
 				}
 		}
 		state.currentLevel--;

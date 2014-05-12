@@ -14,7 +14,7 @@ class HScriptInterpWorker extends WorkerScript {
 		var interp = new Interp();
 		var result:Result = try {
 			var interpResult = interp.execute(expr);
-			Item(interpResult, ""+interpResult);
+			Item(interpResult, new SimpleDisplay(""+interpResult));
 		} catch (e:hscript.Expr.Error) {
 			Error("HScript interpreter error: "+e);
 		}

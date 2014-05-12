@@ -1,5 +1,7 @@
 package qa.providers;
 import byte.ByteData;
+import js.html.Element;
+import js.html.IFrameElement;
 import qa.algebra.Algebra;
 import qa.algebra.Evaluation;
 import qa.algebra.Parser;
@@ -35,7 +37,7 @@ class AlgebraParserProvider implements Provider {
 		
 		try {
 			var expr = parser.parse();
-			return new StaticQuery(Item(expr, AlgebraPrinter.printTex(expr)));
+			return new StaticQuery(Item(expr, new SimpleDisplay(AlgebraPrinter.printTex(expr))));
 		} catch (e:Dynamic) {
 			//return new StaticQuery(Error("Algebra parsing error: "+e));
 			return new StaticQuery(None);
@@ -60,8 +62,78 @@ class AlgebraEvalProvider implements Provider {
 			case _:
 				var evalState = new EvalState();
 				var answer = AlgebraEvaluator.eval(expr, evalState);
-				Item(answer, AlgebraPrinter.printTex(answer));
+				Item(answer, new SimpleDisplay(AlgebraPrinter.printTex(answer)));
 		});
+		
+	}
+}
+
+class MathBoxDisplay extends Display {
+	var id:Int;
+	var expr:MathExpression;
+	public function new(id:Int, expr:MathExpression) {
+		this.id = id;
+		this.expr = expr;
+	}
+	override public function apply(element:Element) {
+		var frameid = 'mathbox-query-frame-$id';
+		//var funcid = 'mathboxQueryFunction$id';
+		
+		var iframes = element.getElementsByTagName("iframe");
+		var frame:IFrameElement;
+		if (iframes.length > 0) {
+			frame = cast iframes[0];
+			callMathBox(frame);
+		} else {
+			//element.innerHTML = '<div><iframe class="mathbox-frame" frameborder="0" id="$frameid" src="lib/mathbox.html"></iframe><script> var m = document.getElementById("$frameid"); m.onload = function() { this.contentWindow.$call } </script></div>';
+			element.innerHTML = '<iframe class="mathbox-frame" frameborder="0" id="$frameid" src="lib/mathbox.html"></iframe>';
+			frame = cast element.getElementsByTagName("iframe")[0];
+			frame.contentWindow.addEventListener("mathboxReady", function(e) {
+				callMathBox(frame);
+			});
+		}
+	}
+	function callMathBox(frame:IFrameElement) {
+		var primid = frame.id+"-primitive";
+		
+		var evalState = new EvalState();
+		evalState.evalPartial = true;
+		
+		var vars = new Array<String>();
+		AlgebraEvaluator.accumulateVariables(expr, vars);
+		
+		var f:Dynamic = null;
+		
+		switch (vars.length) {
+			case 0: throw "Missing variables in partial expression";
+			case 1:
+				f = function(x:Float) {
+					evalState.boundVars[vars[0]] = CReal(x);
+					evalState.steps.clear();
+					var res = AlgebraEvaluator.eval(expr, evalState);
+					switch (res) {
+						case ESymbol(SConst(CReal(n))):
+							return (n:Float);
+						case _:
+							return 0;
+					}
+				};
+				untyped frame.contentWindow.showFunction2D(primid, f);
+			case 2:
+				f = function(x:Float, y:Float) {
+					evalState.boundVars[vars[0]] = CReal(x);
+					evalState.boundVars[vars[1]] = CReal(y);
+					evalState.steps.clear();
+					var res = AlgebraEvaluator.eval(expr, evalState);
+					switch (res) {
+						case ESymbol(SConst(CReal(n))):
+							return (n:Float);
+						case _:
+							return 0;
+					}
+				}
+				untyped frame.contentWindow.showFunction3D(primid, f);
+		}
 		
 	}
 }
@@ -86,58 +158,8 @@ class MathBoxProvider implements Provider {
 			case EPartial(_):
 				var id = queries++;
 				
-				var frameid = 'mathbox-query-frame-$id';
-				var funcid = 'mathboxQueryFunction$id';
-				var primid = 'primitive-$id';
+				Item(null, new MathBoxDisplay(id, expr));
 				
-				var evalState = new EvalState();
-				evalState.evalPartial = true;
-				
-				//evalState.boundVars["x"] = CReal(5);
-				//evalState.steps.clear();
-				//var res = AlgebraEvaluator.eval(expr, evalState);
-				//trace("EVALUATED");
-				//trace(res);
-				
-				var vars = new Array<String>();
-				AlgebraEvaluator.accumulateVariables(expr, vars);
-				
-				var f:Dynamic = null;
-				var call = "";
-				
-				switch (vars.length) {
-					case 0: throw "Missing variables in partial expression";
-					case 1:
-						f = function(x:Float) {
-							evalState.boundVars[vars[0]] = CReal(x);
-							evalState.steps.clear();
-							var res = AlgebraEvaluator.eval(expr, evalState);
-							switch (res) {
-								case ESymbol(SConst(CReal(n))):
-									return (n:Float);
-								case _:
-									return 0;
-							}
-						};
-						call = 'showFunction2D("$primid", window.$funcid)';
-					case 2:
-						f = function(x:Float, y:Float) {
-							evalState.boundVars[vars[0]] = CReal(x);
-							evalState.boundVars[vars[1]] = CReal(y);
-							evalState.steps.clear();
-							var res = AlgebraEvaluator.eval(expr, evalState);
-							switch (res) {
-								case ESymbol(SConst(CReal(n))):
-									return (n:Float);
-								case _:
-									return 0;
-							}
-						}
-						call = 'showFunction3D("$primid", window.$funcid)';
-				}
-				
-				untyped window[funcid] = f;
-				Item(null, '<div><iframe class="mathbox-frame" frameborder="0" id="$frameid" src="lib/mathbox.html"></iframe><script> var m = document.getElementById("$frameid"); m.onload = function() { this.contentWindow.$call } </script></div>');
 			case _: None;
 		});
 		
