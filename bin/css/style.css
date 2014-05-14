@@ -53,7 +53,8 @@ body {
 	margin-top: 1em;
 }
 .step {
-    padding: 4px;
+	padding: 2px 4px;
+	font-size: 12px;
 }
 .steps {
 	margin-bottom: 3em;

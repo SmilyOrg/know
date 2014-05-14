@@ -22,7 +22,33 @@ class EvalState {
 	public var steps = new List<EvalStep>();
 	public var boundVars = new Map<String, Constant>();
 	public var evalPartial:Bool = false;
-	public function new() {}
+	public var functionMap = new Map<String, String->Array<MathExpression>->EvalState->MathExpression>();
+	public function new() {
+		addSingleReal("sin", Math.sin);
+		addSingleReal("cos", Math.cos);
+		addSingleReal("tan", Math.tan);
+		addSingleReal("atan", Math.atan);
+		addSingleReal("acos", Math.acos);
+		addSingleReal("asin", Math.asin);
+		addSingleReal("abs", Math.abs);
+		addSingleReal("ceil", Math.ceil);
+		addSingleReal("floor", Math.floor);
+		addSingleReal("round", Math.round);
+	}
+	function addSingleReal(name:String, f:Float->Float) {
+		functionMap[name] = function(name:String, args:Array<MathExpression>, state:EvalState) {
+			if (args.length != 1) throw "Invalid function argument count";
+			var arg = AlgebraEvaluator.eval(args[0], state);
+			return switch (arg) {
+				case ESymbol(SConst(c)):
+					switch (Algebra.changeRank(c, CReal(Real.ZERO))) {
+						case CReal(n): ESymbol(SConst(CReal(f((n:Float)))));
+						case _: throw "Unable to change constant rank";
+					}
+				case _: EPartial(EFunction(name, [arg]));
+			}
+		};
+	}
 	public function addStep(type:EvalStepType) {
 		steps.add({ type: type, level: currentLevel });
 	}
@@ -35,6 +61,8 @@ class AlgebraEvaluator {
 			case ESymbol(SVariable(name)):
 				if (vars.indexOf(name) == -1) vars.push(name);
 			case ESymbol(SConst(_)):
+			case EFunction(_, args):
+				for (arg in args) accumulateVariables(arg, vars);
 			case EPartial(e), EParenthesis(e), ENeg(e):
 				accumulateVariables(e, vars);
 			case EBinop(_, e1, e2):
@@ -51,6 +79,13 @@ class AlgebraEvaluator {
 		}
 		//state.addStep(Expression(e));
 		var result:MathExpression = switch(e) {
+			case EFunction(name, args):
+				var map = state.functionMap[name];
+				if (map == null) {
+					EPartial(e);
+				} else {
+					map(name, args, state);
+				}
 			case EPartial(partial):
 				return state.evalPartial ? eval(partial, state) : e;
 			case ESymbol(SConst(c)):

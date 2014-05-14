@@ -4,3 +4,4 @@ bin/style.min.css
 src/Version.hx
 updatePages.bat
 bin/HScriptInterpWorker.js
+bin/css/style.min.css

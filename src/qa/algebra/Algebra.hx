@@ -13,6 +13,7 @@ enum MathExpression {
 	EParenthesis(e:MathExpression);
 	ENeg(e:MathExpression);
 	EPartial(e:MathExpression);
+	EFunction(name:String, args:Array<MathExpression>);
 }
 
 class Algebra {
@@ -37,6 +38,7 @@ class Algebra {
 		}
 	}
 	
+	// TODO fix so base is int
 	public static function changeRank(c:Constant, base:Constant, state:EvalState = null):Constant {
 		var rb = getConstantRank(base);
 		
@@ -95,6 +97,7 @@ class AlgebraPrinter {
 	
 	static private function getExpressionTag(e:MathExpression) {
 		return getTag(switch (e) {
+			case EFunction(_, _):       "fun";
 			case ESymbol(SConst(_)):    "const";
 			case ESymbol(SVariable(_)): "var";
 			case EBinop(_):             "binop";
@@ -111,6 +114,7 @@ class AlgebraPrinter {
 				//"Eval " +
 				var expr = switch (e) {
 					//case EConst(c): 'constant ${printConstant(c)}';
+					case EFunction(_, _): printTexInline(e);
 					case EPartial(e): printTexInline(e);
 					case ESymbol(SConst(c)): printConstant(c);
 					case ESymbol(SVariable(name)): name;
@@ -151,6 +155,8 @@ class AlgebraPrinter {
 	}
 	static public function printTexMath(expr:MathExpression, highlightBinop:Bool = false):String {
 		return switch (expr) {
+			case EFunction(name, args):
+				'\\mathrm{$name}\\left(' + args.map(printTexMath.bind(_, false)).join(", ") + '\\right)';
 			case EPartial(e):
 				//printTexMath(e);
 				'\\left<${printTexMath(e)}\\right>';

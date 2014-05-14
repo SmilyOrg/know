@@ -38,6 +38,7 @@ class AlgebraParserProvider implements Provider {
 		try {
 			var expr = parser.parse();
 			return new StaticQuery(Item(expr, new SimpleDisplay(AlgebraPrinter.printTex(expr))));
+			//return new StaticQuery(Item(expr, new StepDisplay(AlgebraPrinter.printTex(expr), parser.steps)));
 		} catch (e:Dynamic) {
 			//return new StaticQuery(Error("Algebra parsing error: "+e));
 			return new StaticQuery(None);

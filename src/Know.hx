@@ -70,7 +70,9 @@ class Know {
 		//input.val("1+2*3^4*5+6");
 		//input.val("1+2*3^4*5+1*1-1+1");
 		//input.val("1^2*3+4");
-		input.val("x^2");
+		//input.val("x^2");
+		//input.val("sin(1)");
+		input.val("sin(x)");
 		//input.val("-x^2");
 		//input.val("1-2+x^2-3+4");
 		//input.val("x^2+y^2");

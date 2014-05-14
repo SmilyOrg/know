@@ -22,6 +22,18 @@ class SimpleDisplay extends Display {
 	}
 }
 
+class StepDisplay extends SimpleDisplay {
+	var steps:Array<String>;
+	public function new(printed:String, steps:Array<String>) {
+		super(printed);
+		this.steps = steps;
+	}
+	override public function apply(element:Element) {
+		super.apply(element);
+		element.innerHTML += "<div class='steps'>" + [for (step in steps) '<div class=\'step\'>$step</div>'].join("\n") + "</div>";
+	}
+}
+
 class Query {
 	public var question:Dynamic;
 	public var provider:Provider;

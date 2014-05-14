@@ -10,6 +10,7 @@ enum AlgebraToken {
 	TSymbol(c:Symbol);
 	TPOpen;
 	TPClose;
+	TComma;
 	TBinop(op:AlgebraBinop);
 	TEof;
 }
@@ -38,6 +39,8 @@ class AlgebraLexer extends hxparse.Lexer implements hxparse.RuleBuilder {
 		
 		"\\(" => TPOpen,
 		"\\)" => TPClose,
+		"\\," => TComma,
+		
 		"\\+" => TBinop(OpAdd),
 		"\\-" => TBinop(OpSub),
 		"\\*" => TBinop(OpMul),
@@ -57,7 +60,7 @@ class AlgebraParser extends hxparse.Parser<AlgebraLexer, AlgebraToken> implement
 		steps.splice(0, steps.length);
 	}
 	
-	function step(msg:String) {
+	inline function step(msg:String) {
 		steps.push(msg);
 	}
 	
@@ -82,14 +85,41 @@ class AlgebraParser extends hxparse.Parser<AlgebraLexer, AlgebraToken> implement
 	}
 	
 	public function parseElement():MathExpression {
+		step("parseElement");
 		return switch stream {
 			case [TSymbol(c)]:
-				step('symbol $c');
-				ESymbol(c);
+				switch stream {
+					case [TPOpen, args = parseArguments(), TPClose]:
+						switch (c) {
+							case SVariable(name):
+								step('function $name');
+								EFunction(name, args);
+							case _: throw "Unsupported parenthesis after constant";
+						}
+					case _:
+						step('symbol $c');
+						ESymbol(c);
+				}
 			case [TPOpen, e = parse(), TPClose]:
 				step('paren $e');
 				EParenthesis(e);
 		}
+	}
+	
+	function parseArguments():Array<MathExpression> {
+		step("parseArguments");
+		var args = new Array<MathExpression>();
+		while (true) {
+			step("parsing argument");
+			args.push(parse());
+			step("parsed argument");
+			switch stream {
+				case [TComma]:
+				case _:
+					break;
+			}
+		}
+		return args;
 	}
 
 	function parseNext(e1:MathExpression):MathExpression {
