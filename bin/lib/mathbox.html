@@ -537,7 +537,8 @@ function mathboxSetup() {
 	// Cartesian viewport
 	.viewport({
 		type: 'cartesian',
-		range: [[-3, 3], [-3, 3], [-3, 3]],
+		//range: [[-3, 3], [-3, 3], [-3, 3]],
+		range: [[0, 1], [0, 1], [0, 1]],
 		scale: [1, 1, 1],
 	})
 	.camera({
@@ -547,21 +548,6 @@ function mathboxSetup() {
 	})
 	.transition(300)
 }
-
-var mathboxScript = [
-	// Steps go here
-	['add', 'curve', {
-	id: 'my-curve',
-	domain: [-3, 3],
-	expression: function (x, i) {
-		return [x, Math.sin(x), 0];
-	},
-	// ...
-	}, {
-	delay: 500,
-	duration: 300,
-	}],
-];
 
 </script>
 
@@ -586,21 +572,13 @@ var mathboxScript = [
 		
 		mathbox
 		.grid({
+			id: 'xy-grid',
 			axis: [ 0, 1 ],         // Primary and secondary grid axis (0 = X, 1 = Y, 2 = Z)
-			offset: [0, 0, 0],      // Shift grid position
+			offset: [0, 0, 0 ],      // Shift grid position
 			show: [ true, true ],   // Show horizontal and vertical direction
 			n: 2,                   // Number of points on grid line (set to higher for curved viewports)
 			ticks: [ 10, 10 ],      // Approximate number of ticks on axis (ticks are spaced at sensible units).
-			tickUnit: [ 1, 1],      // Base unit for ticks on each axis. Set to π e.g. to space ticks at multiples of π.
-			tickScale: [ 10, 10 ],  // Integer denoting the base for recursive division on each axis. 2 = binary, 10 = decimal
-		})
-		.grid({
-			axis: [ 1, 2 ],         // Primary and secondary grid axis (0 = X, 1 = Y, 2 = Z)
-			offset: [0, 0, 0],      // Shift grid position
-			show: [ true, true ],   // Show horizontal and vertical direction
-			n: 2,                   // Number of points on grid line (set to higher for curved viewports)
-			ticks: [ 10, 10 ],      // Approximate number of ticks on axis (ticks are spaced at sensible units).
-			tickUnit: [ 1, 1],      // Base unit for ticks on each axis. Set to π e.g. to space ticks at multiples of π.
+			tickUnit: [ 1, 1 ],      // Base unit for ticks on each axis. Set to π e.g. to space ticks at multiples of π.
 			tickScale: [ 10, 10 ],  // Integer denoting the base for recursive division on each axis. 2 = binary, 10 = decimal
 		})
 		.axis({
@@ -622,16 +600,6 @@ var mathboxScript = [
 			labels: true,
 			zero: false,
 		})
-		.axis({
-			id: 'z-axis',
-			axis: 2,
-			color: 0xa0a0a0,
-			ticks: 5,
-			lineWidth: 2,
-			size: .05,
-			zero: false,
-			labels: true,
-		})
 		
 		window.dispatchEvent(new Event("mathboxReady"));
 		
@@ -648,11 +616,12 @@ var mathboxScript = [
 	//var pending = null;
 	function showFunction2D(id, f) {
 		showFunction(id, f, "curve", {
-			domain: [-3, 3],
+			domain: [0, 1],
 		});
 		var cam = window.mathbox.select("camera")[0].controls;
 		cam.phi = Math.PI/2;
 		cam.theta = 0;
+		window.mathbox.remove("#yz-grid, #xz-grid, #z-axis");
 	}
 	function showFunction3D(id, f) {
 		showFunction(id, f, "surface", {
@@ -665,6 +634,37 @@ var mathboxScript = [
 			flipSided: false,                      // Whether to flip a single sided mesh
 			shaded: false,                          // Whether to shade the surface
 		});
+		window.mathbox
+		.grid({
+			id: 'yz-grid',
+			axis: [ 1, 2 ],         // Primary and secondary grid axis (0 = X, 1 = Y, 2 = Z)
+			offset: [0, 0, 0 ],      // Shift grid position
+			show: [ true, true ],   // Show horizontal and vertical direction
+			n: 2,                   // Number of points on grid line (set to higher for curved viewports)
+			ticks: [ 10, 10 ],      // Approximate number of ticks on axis (ticks are spaced at sensible units).
+			tickUnit: [ 1, 1 ],      // Base unit for ticks on each axis. Set to π e.g. to space ticks at multiples of π.
+			tickScale: [ 10, 10 ],  // Integer denoting the base for recursive division on each axis. 2 = binary, 10 = decimal
+		})
+		.grid({
+			id: 'xz-grid',
+			axis: [ 0, 2 ],         // Primary and secondary grid axis (0 = X, 1 = Y, 2 = Z)
+			offset: [0, 0, 0 ],      // Shift grid position
+			show: [ true, true ],   // Show horizontal and vertical direction
+			n: 2,                   // Number of points on grid line (set to higher for curved viewports)
+			ticks: [ 10, 10 ],      // Approximate number of ticks on axis (ticks are spaced at sensible units).
+			tickUnit: [ 1, 1 ],      // Base unit for ticks on each axis. Set to π e.g. to space ticks at multiples of π.
+			tickScale: [ 10, 10 ],  // Integer denoting the base for recursive division on each axis. 2 = binary, 10 = decimal
+		})
+		.axis({
+			id: 'z-axis',
+			axis: 2,
+			color: 0xa0a0a0,
+			ticks: 5,
+			lineWidth: 2,
+			size: .05,
+			zero: false,
+			labels: true,
+		})
 	}
 	function showFunction(id, f, prim, props) {
 		var m = window.mathbox;

@@ -59,12 +59,45 @@ class AlgebraEvalProvider implements Provider {
 		
 		var expr:MathExpression = item;
 		return new StaticQuery(switch (expr) {
-			case EPartial(_), ESymbol(_): None;
+			//case EPartial(_), ESymbol(_): None;
+			case EPartial(_), ESymbol(SConst(_)): None;
 			case _:
 				var evalState = new EvalState();
 				var answer = AlgebraEvaluator.eval(expr, evalState);
-				//Item(answer, new SimpleDisplay(AlgebraPrinter.printTex(answer)));
-				Item(answer, new StepDisplay(AlgebraPrinter.printTex(answer), evalState.steps.map(AlgebraPrinter.printEvalStep)));
+				switch (answer) {
+					case ESymbol(SVariable(_)): None;
+					case _:
+						//Item(answer, new SimpleDisplay(AlgebraPrinter.printTex(answer)));
+						Item(answer, new StepDisplay(AlgebraPrinter.printTex(answer), evalState.steps.map(AlgebraPrinter.printEvalStep)));
+				}
+		});
+		
+	}
+}
+
+class MathBoxProvider implements Provider {
+	
+	private var queries:Int;
+	
+	public function new() {
+		reset();
+	}
+	
+	public function reset() {
+		queries = 0;
+	}
+	
+	public function query(item:Dynamic):Query {
+		if (Type.getEnum(item) != MathExpression) return new StaticQuery(None);
+		
+		var expr:MathExpression = item;
+		return new StaticQuery(switch (expr) {
+			case EPartial(_):
+				var id = queries++;
+				
+				Item(null, new MathBoxDisplay(id, expr));
+				
+			case _: None;
 		});
 		
 	}
@@ -143,30 +176,3 @@ class MathBoxDisplay extends Display {
 	}
 }
 
-class MathBoxProvider implements Provider {
-	
-	private var queries:Int;
-	
-	public function new() {
-		reset();
-	}
-	
-	public function reset() {
-		queries = 0;
-	}
-	
-	public function query(item:Dynamic):Query {
-		if (Type.getEnum(item) != MathExpression) return new StaticQuery(None);
-		
-		var expr:MathExpression = item;
-		return new StaticQuery(switch (expr) {
-			case EPartial(_):
-				var id = queries++;
-				
-				Item(null, new MathBoxDisplay(id, expr));
-				
-			case _: None;
-		});
-		
-	}
-}

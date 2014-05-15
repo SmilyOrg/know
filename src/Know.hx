@@ -76,11 +76,16 @@ class Know {
 		//input.val("1+1");
 		//input.val("1-2*3+3*2^5*5");
 		//input.val("1+2*3^4*5+6");
-		input.val("1+2*3^4*5+1*1-1+1");
+		//input.val("1+2*3^4*5+1*1-1+1");
 		//input.val("1^2*3+4");
 		//input.val("x^2");
 		//input.val("sin(1)");
 		//input.val("sin(x)");
+		//input.val("pi");
+		//input.val("pi*2");
+		//input.val("2*pi");
+		//input.val("pi*pi");
+		input.val("log(1+x*(e^3-1))/3");
 		//input.val("-x^2");
 		//input.val("1-2+x^2-3+4");
 		//input.val("x^2+y^2");

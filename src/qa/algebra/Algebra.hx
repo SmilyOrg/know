@@ -16,6 +16,26 @@ enum MathExpression {
 	EFunction(name:String, args:Array<MathExpression>);
 }
 
+enum Constant {
+	CInteger(n:Integer, format:NumberFormat);
+	CRational(n:SimpleFraction);
+	CReal(n:Real);
+	CMathematical(c:Constant, symbol:String);
+}
+
+enum Symbol {
+	SConst(c:Constant);
+	SVariable(name:String);
+}
+
+enum AlgebraBinop {
+	OpAdd;
+	OpSub;
+	OpMul;
+	OpDiv;
+	OpPow;
+}
+
 class Algebra {
 	
 	public static function getPrecedenceRank(op:AlgebraBinop) {
@@ -35,6 +55,7 @@ class Algebra {
 			case CInteger(_, _): 0;
 			case CRational(_):   1;
 			case CReal(_):       2;
+			case CMathematical(c, _): 3;
 		}
 	}
 	
@@ -49,7 +70,9 @@ class Algebra {
 				if (state != null) state.addStep(Promote(c, p));
 				c = p;
 			} else {
-				throw 'Constant demotion not supported';
+				var d = demoteConst(c);
+				if (state != null) state.addStep(Demote(c, d));
+				c = d;
 			}
 			
 			var nrc = getConstantRank(c);
@@ -67,25 +90,12 @@ class Algebra {
 			case _: throw 'Unimplemented rank promotion for $c';	
 		}
 	}
-}
-
-enum Constant {
-	CInteger(n:Integer, format:NumberFormat);
-	CRational(n:SimpleFraction);
-	CReal(n:Real);
-}
-
-enum Symbol {
-	SConst(c:Constant);
-	SVariable(name:String);
-}
-
-enum AlgebraBinop {
-	OpAdd;
-	OpSub;
-	OpMul;
-	OpDiv;
-	OpPow;
+	public static function demoteConst(c:Constant) {
+		return switch (c) {
+			case CMathematical(c, _): c;
+			case _: throw 'Unimplemented rank demotion for $c';	
+		}
+	}
 }
 
 class AlgebraPrinter {
@@ -110,6 +120,7 @@ class AlgebraPrinter {
 	static public function printEvalStep(step:EvalStep) {
 		var type = switch (step.type) {
 			case Promote(c, p): getTag("promoted") + '${printConstant(c)} to ${printConstant(p)}';
+			case Demote(c, d): getTag("demoted") + '${printConstant(c)} to ${printConstant(d)}';
 			case Expression(e):
 				//"Eval " +
 				var expr = switch (e) {
@@ -136,6 +147,7 @@ class AlgebraPrinter {
 			case CInteger(_, _): "integer";
 			case CRational(_):   "rational";
 			case CReal(_):       "real";
+			case CMathematical(_, symbol): 'mathematical $symbol';
 		};
 		return '$type \\(' + printTexMath(ESymbol(SConst(c))) + '\\)';
 		//return "\\(" + printTexMath(EConst(c)) + '^{$type} \\)';
@@ -175,6 +187,8 @@ class AlgebraPrinter {
 						"\\left(\\frac{" + n.getNumerator().toString() + "}{" + n.getDenominator().toString() + "}\\right)";
 					case CReal(n):
 						"" + n.toString();
+					case CMathematical(_, symbol):
+						symbol;
 				};
 			case ESymbol(SVariable(name)):
 				'\\mathtt{$name}';

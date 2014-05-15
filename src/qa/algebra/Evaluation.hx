@@ -9,6 +9,7 @@ enum EvalStepType {
 	Expression(e:MathExpression);
 	Result(c:MathExpression);
 	Promote(c:Constant, p:Constant);
+	Demote(c:Constant, d:Constant);
 	UnknownSymbol(s:Symbol);
 }
 
@@ -24,6 +25,11 @@ class EvalState {
 	public var evalPartial:Bool = false;
 	public var functionMap = new Map<String, String->Array<MathExpression>->EvalState->MathExpression>();
 	public function new() {
+		boundVars["pi"]  = CMathematical(CReal(3.1415926535897932384626433832795028841971693993751058), "\u{1D70B}");
+		boundVars["tau"] = CMathematical(CReal(6.2831853071795864769252867665590057683943387987502116), "\u{1D70F}");
+		boundVars["e"]   = CMathematical(CReal(2.71828182845904523536028747135266249775724709369995), "e");
+		boundVars["phi"] = CMathematical(CReal(1.61803398874989484820458683436563811), "\u03D5");
+		
 		addSingleReal("sin", Math.sin);
 		addSingleReal("cos", Math.cos);
 		addSingleReal("tan", Math.tan);
@@ -34,6 +40,8 @@ class EvalState {
 		addSingleReal("ceil", Math.ceil);
 		addSingleReal("floor", Math.floor);
 		addSingleReal("round", Math.round);
+		addSingleReal("log", Math.log);
+		
 	}
 	function addSingleReal(name:String, f:Float->Float) {
 		functionMap[name] = function(name:String, args:Array<MathExpression>, state:EvalState) {
@@ -142,6 +150,9 @@ class AlgebraEvaluator {
 									case OpDiv: CReal(a/b);
 									case OpPow: CReal(a.pow(b));
 								}));
+								
+							case [CMathematical(c, _), _]: eval(EBinop(op, ESymbol(SConst(c)), e2), state);
+							case [_, CMathematical(c, _)]: eval(EBinop(op, e1, ESymbol(SConst(c))), state);
 							
 							case [a, b]:
 								// None of the cases match, perhaps one of them needs promotion
@@ -177,10 +188,15 @@ class AlgebraEvaluator {
 			case ENeg(e):
 				switch (e) {
 					case ESymbol(SConst(c)):
+						switch (c) {
+							case CMathematical(m, _): c = m;
+							case _:
+						}
 						ESymbol(SConst(switch (c) {
 							case CInteger(n, format):  CInteger(n.negate(), format);
 							case CRational(n): CRational(n.negate());
 							case CReal(n): CReal(n.negate());
+							case CMathematical(_, _): throw "Internal error trying to negate mathematical constant";
 						}));
 					case _:
 						if (e.match(ESymbol(SConst(_)))) throw 'Unimplemented negation $e';
