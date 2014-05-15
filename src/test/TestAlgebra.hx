@@ -2,7 +2,7 @@ package test;
 import haxe.unit.TestCase;
 import qa.algebra.Algebra;
 import qa.arithmetic.Arithmetic.Real;
-import qa.providers.HScript;
+import qa.providers.hscript.HScript;
 import qa.providers.Provider.Result;
 
 import qa.providers.Math;

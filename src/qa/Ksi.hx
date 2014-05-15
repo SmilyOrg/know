@@ -3,7 +3,7 @@ import byte.ByteData;
 import qa.algebra.Parser;
 import qa.algebra.Algebra;
 import qa.algebra.Evaluation;
-import qa.providers.HScript;
+import qa.providers.hscript.HScript;
 import qa.providers.Math;
 import qa.providers.Weather;
 import qa.providers.Provider;
@@ -133,7 +133,8 @@ class Ksi {
 		switch (q.result) {
 			case None:
 			case Error(msg):
-				var display = new SimpleDisplay("<h3 class='provider-name'>"+Type.getClassName(Type.getClass(q.provider))+"</h3>"+msg);
+				//var display = new SimpleDisplay("<h3 class='provider-name'>"+Type.getClassName(Type.getClass(q.provider))+"</h3>"+msg);
+				var display = new SimpleDisplay(msg);
 				queryResultDisplay(q, display);
 			case Item(item, display):
 				pending.add(item);

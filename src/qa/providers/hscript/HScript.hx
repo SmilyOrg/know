@@ -1,4 +1,4 @@
-package qa.providers;
+package qa.providers.hscript;
 import haxe.Serializer;
 import haxe.Timer;
 import haxe.Unserializer;

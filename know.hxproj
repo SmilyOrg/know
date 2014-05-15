@@ -30,6 +30,7 @@
   <haxelib>
     <library name="hxparse" />
     <library name="hscript" />
+    <library name="jqueryextern" />
   </haxelib>
   <!-- Class files to compile (other referenced classes will automatically be included) -->
   <compileTargets>

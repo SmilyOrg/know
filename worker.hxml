@@ -1,4 +1,5 @@
 -lib hscript
+-lib jqueryextern
 -cp src
 -js bin/HScriptInterpWorker.js
--main qa.providers.HScriptInterpWorker
+-main qa.providers.hscript.HScriptInterpWorker

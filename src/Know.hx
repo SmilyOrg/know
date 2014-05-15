@@ -2,11 +2,12 @@ package ;
 
 import haxe.unit.TestRunner;
 import hxparse.NoMatch;
+import jQuery.JQuery;
+import jQuery.JQueryHelper.J;
 import js.Browser;
 import js.html.DivElement;
 import js.html.Element;
-import js.JQuery;
-import js.JQuery.JQueryHelper.J;
+import js.html.Node;
 import js.Lib;
 import qa.providers.Provider;
 import test.TestAlgebra;
@@ -50,6 +51,13 @@ class Know {
 		debug = J("#debug");
 		answers = J("#answers");
 		
+		output.on("click", ".show", function(e) {
+			J(e.target).hide().siblings(".steps, .hide").show();
+		});
+		output.on("click", ".hide", function(e) {
+			J(e.target).hide().siblings(".steps").hide().siblings(".show").show();
+		});
+		
 		//input.val("1/2*3");
 		//input.val("1+10");
 		//input.val("0xFF");
@@ -68,11 +76,11 @@ class Know {
 		//input.val("1+1");
 		//input.val("1-2*3+3*2^5*5");
 		//input.val("1+2*3^4*5+6");
-		//input.val("1+2*3^4*5+1*1-1+1");
+		input.val("1+2*3^4*5+1*1-1+1");
 		//input.val("1^2*3+4");
 		//input.val("x^2");
 		//input.val("sin(1)");
-		input.val("sin(x)");
+		//input.val("sin(x)");
 		//input.val("-x^2");
 		//input.val("1-2+x^2-3+4");
 		//input.val("x^2+y^2");
@@ -94,10 +102,10 @@ class Know {
 		//untyped __js__("require('nw.gui').Window.get().showDevTools()");
 	}
 	
-	function inputChange(e:JqEvent = null) {
-		var question = input.val();
+	function inputChange(e = null) {
+		var question:String = input.val();
 		info.text("");
-		setColor(output, Theme.disabled);
+		//setColor(output., Theme.disabled);
 		if (question.length == 0) {
 			answers.text("");
 			return;
@@ -144,7 +152,7 @@ class Know {
 		if (answer.display.provider == null) throw "what" + answer.display;
 		var result = getResultElement(answer.display.provider);
 		answer.display.apply(result);
-		setColor(J(result), Theme.normal);
+		//setColor(J(result), Theme.normal);
 		typeset(result);
 	}
 	
@@ -158,10 +166,11 @@ class Know {
 		var existing = answers.children('.$id.outdated');
 		var result:Element;
 		if (existing.length > 0) {
-			result = existing.first().removeClass("outdated")[0];
+			result = cast existing.first().removeClass("outdated")[0];
 		} else {
-			result = Browser.document.createDivElement();
-			result.classList.add(id);
+			var element = Browser.document.createDivElement();
+			element.classList.add(id);
+			result = element;
 			answers.append(result);
 		}
 		return result;

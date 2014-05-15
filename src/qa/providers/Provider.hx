@@ -1,5 +1,7 @@
 package qa.providers;
 import js.html.Element;
+import jQuery.JQuery;
+import jQuery.JQueryHelper.J;
 
 enum Result {
 	None;
@@ -18,7 +20,7 @@ class SimpleDisplay extends Display {
 		this.printed = printed;
 	}
 	override public function apply(element:Element) {
-		element.innerHTML = "<h3 class='provider-name'>"+Type.getClassName(Type.getClass(provider))+"</h3>"+printed;
+		element.innerHTML = "<h3 class='provider-name'>"+Type.getClassName(Type.getClass(provider))+"</h3><div class='content'>"+printed+"</div>";
 	}
 }
 
@@ -29,8 +31,13 @@ class StepDisplay extends SimpleDisplay {
 		this.steps = steps;
 	}
 	override public function apply(element:Element) {
-		super.apply(element);
-		element.innerHTML += "<div class='steps'>" + [for (step in steps) '<div class=\'step\'>$step</div>'].join("\n") + "</div>";
+		J(element).html("
+			<h3 class='provider-name'>"+Type.getClassName(Type.getClass(provider))+"</h3>
+			<a href='#' class='show'>show steps</a>
+			<a href='#' class='hide'>hide steps</a>
+			<div class='content'>" + printed + "</div>
+			<div class='steps'>" + [for (step in steps) '<div class=\'step\'>$step</div>'].join('\n') + "</div>
+		");
 	}
 }
 

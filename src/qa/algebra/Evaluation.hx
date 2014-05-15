@@ -19,7 +19,7 @@ typedef EvalStep = {
 
 class EvalState {
 	public var currentLevel:Int;
-	public var steps = new List<EvalStep>();
+	public var steps = new Array<EvalStep>();
 	public var boundVars = new Map<String, Constant>();
 	public var evalPartial:Bool = false;
 	public var functionMap = new Map<String, String->Array<MathExpression>->EvalState->MathExpression>();
@@ -50,7 +50,10 @@ class EvalState {
 		};
 	}
 	public function addStep(type:EvalStepType) {
-		steps.add({ type: type, level: currentLevel });
+		steps.push({ type: type, level: currentLevel });
+	}
+	public function clearSteps() {
+		steps.splice(0, steps.length);
 	}
 }
 

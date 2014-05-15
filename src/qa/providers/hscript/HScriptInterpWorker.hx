@@ -1,10 +1,9 @@
-package qa.providers;
+package qa.providers.hscript;
+import hscript.Expr;
 import haxe.Serializer;
 import haxe.Unserializer;
-import hscript.Expr;
 import hscript.Interp;
 import js.html.MessageEvent;
-import js.html.Worker;
 import qa.providers.Provider;
 
 using WorkerScript;
@@ -12,6 +11,7 @@ using WorkerScript;
 class HScriptInterpWorker extends WorkerScript {
 	public static function interpret(expr:Expr) {
 		var interp = new Interp();
+		//interp.variables["sin"] = Math.sin;
 		var result:Result = try {
 			var interpResult = interp.execute(expr);
 			Item(interpResult, new SimpleDisplay(""+interpResult));

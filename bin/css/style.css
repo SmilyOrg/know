@@ -48,6 +48,10 @@ body {
 }
 .provider-name {
 	font-size: 12px;
+	display: inline-block;
+}
+.outdated {
+    opacity: 0.5;
 }
 .tokens {
 	margin-top: 1em;
@@ -58,7 +62,19 @@ body {
 }
 .steps {
 	margin-bottom: 3em;
+	display: none;
 }
+.show, .hide {
+    color: #727272;
+    text-decoration: none;
+    font-weight: normal;
+    font-size: 12px;
+    margin-left: 10px;
+}
+.hide {
+	display: none;
+}
+
 .indent {
 	width: 4em;
 }

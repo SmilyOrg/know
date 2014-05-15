@@ -37,8 +37,8 @@ class AlgebraParserProvider implements Provider {
 		
 		try {
 			var expr = parser.parse();
-			return new StaticQuery(Item(expr, new SimpleDisplay(AlgebraPrinter.printTex(expr))));
-			//return new StaticQuery(Item(expr, new StepDisplay(AlgebraPrinter.printTex(expr), parser.steps)));
+			//return new StaticQuery(Item(expr, new SimpleDisplay(AlgebraPrinter.printTex(expr))));
+			return new StaticQuery(Item(expr, new StepDisplay(AlgebraPrinter.printTex(expr), parser.steps)));
 		} catch (e:Dynamic) {
 			//return new StaticQuery(Error("Algebra parsing error: "+e));
 			return new StaticQuery(None);
@@ -63,7 +63,8 @@ class AlgebraEvalProvider implements Provider {
 			case _:
 				var evalState = new EvalState();
 				var answer = AlgebraEvaluator.eval(expr, evalState);
-				Item(answer, new SimpleDisplay(AlgebraPrinter.printTex(answer)));
+				//Item(answer, new SimpleDisplay(AlgebraPrinter.printTex(answer)));
+				Item(answer, new StepDisplay(AlgebraPrinter.printTex(answer), evalState.steps.map(AlgebraPrinter.printEvalStep)));
 		});
 		
 	}
@@ -87,7 +88,10 @@ class MathBoxDisplay extends Display {
 			callMathBox(frame);
 		} else {
 			//element.innerHTML = '<div><iframe class="mathbox-frame" frameborder="0" id="$frameid" src="lib/mathbox.html"></iframe><script> var m = document.getElementById("$frameid"); m.onload = function() { this.contentWindow.$call } </script></div>';
-			element.innerHTML = '<iframe class="mathbox-frame" frameborder="0" id="$frameid" src="lib/mathbox.html"></iframe>';
+			element.innerHTML = '
+				<h3 class="provider-name">MathBox</h3>
+				<iframe class="mathbox-frame" frameborder="0" id="$frameid" src="lib/mathbox.html"></iframe>
+			';
 			frame = cast element.getElementsByTagName("iframe")[0];
 			frame.contentWindow.addEventListener("mathboxReady", function(e) {
 				callMathBox(frame);
@@ -110,7 +114,7 @@ class MathBoxDisplay extends Display {
 			case 1:
 				f = function(x:Float) {
 					evalState.boundVars[vars[0]] = CReal(x);
-					evalState.steps.clear();
+					evalState.clearSteps();
 					var res = AlgebraEvaluator.eval(expr, evalState);
 					switch (res) {
 						case ESymbol(SConst(CReal(n))):
@@ -124,7 +128,7 @@ class MathBoxDisplay extends Display {
 				f = function(x:Float, y:Float) {
 					evalState.boundVars[vars[0]] = CReal(x);
 					evalState.boundVars[vars[1]] = CReal(y);
-					evalState.steps.clear();
+					evalState.clearSteps();
 					var res = AlgebraEvaluator.eval(expr, evalState);
 					switch (res) {
 						case ESymbol(SConst(CReal(n))):
