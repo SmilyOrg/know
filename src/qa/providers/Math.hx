@@ -1,5 +1,6 @@
 package qa.providers;
 import byte.ByteData;
+import hxparse.LexerTokenSource;
 import js.html.Element;
 import js.html.IFrameElement;
 import qa.algebra.Algebra;
@@ -15,7 +16,7 @@ class AlgebraParserProvider implements Provider {
 	public function new() {
 		
 		lexer = new AlgebraLexer();
-		parser = new AlgebraParser(lexer, AlgebraLexer.tok);
+		parser = new AlgebraParser(new LexerTokenSource(lexer, AlgebraLexer.tok));
 		
 	}
 	
@@ -38,7 +39,12 @@ class AlgebraParserProvider implements Provider {
 		try {
 			var expr = parser.parse();
 			//return new StaticQuery(Item(expr, new SimpleDisplay(AlgebraPrinter.printTex(expr))));
-			return new StaticQuery(Item(expr, new StepDisplay(AlgebraPrinter.printTex(expr), parser.steps)));
+			var display = new StepDisplay(AlgebraPrinter.printTex(expr), parser.steps);
+			display.relevance = switch (expr) {
+				case ESymbol(_): Irrelevant;
+				case _: Somewhat;
+			}
+			return new StaticQuery(Item(expr, display));
 		} catch (e:Dynamic) {
 			//return new StaticQuery(Error("Algebra parsing error: "+e));
 			return new StaticQuery(None);
@@ -49,8 +55,7 @@ class AlgebraParserProvider implements Provider {
 
 class AlgebraEvalProvider implements Provider {
 	
-	public function new() {
-	}
+	public function new() {}
 	
 	public function reset() {}
 	
@@ -68,7 +73,12 @@ class AlgebraEvalProvider implements Provider {
 					case ESymbol(SVariable(_)): None;
 					case _:
 						//Item(answer, new SimpleDisplay(AlgebraPrinter.printTex(answer)));
-						Item(answer, new StepDisplay(AlgebraPrinter.printTex(answer), evalState.steps.map(AlgebraPrinter.printEvalStep)));
+						var display = new StepDisplay(AlgebraPrinter.printTex(answer), evalState.steps.map(AlgebraPrinter.printEvalStep));
+						display.relevance = switch (answer) {
+							case ESymbol(SConst(_)): Highly;
+							case _: Somewhat;
+						};
+						Item(answer, display);
 				}
 		});
 		
@@ -109,6 +119,7 @@ class MathBoxDisplay extends Display {
 	public function new(id:Int, expr:MathExpression) {
 		this.id = id;
 		this.expr = expr;
+		relevance = Highly;
 	}
 	override public function apply(element:Element) {
 		var frameid = 'mathbox-query-frame-$id';

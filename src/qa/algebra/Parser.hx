@@ -1,6 +1,7 @@
 package qa.algebra;
 
 import byte.ByteData;
+import hxparse.TokenSource;
 import qa.algebra.Algebra;
 import qa.algebra.Evaluation;
 
@@ -51,7 +52,7 @@ class AlgebraLexer extends hxparse.Lexer implements hxparse.RuleBuilder {
 	];
 }
 
-class AlgebraParser extends hxparse.Parser<AlgebraLexer, AlgebraToken> implements hxparse.ParserBuilder {
+class AlgebraParser extends hxparse.Parser<hxparse.LexerTokenSource<AlgebraToken>, AlgebraToken> implements hxparse.ParserBuilder {
 
 	public var steps = new Array<String>();
 	
@@ -64,7 +65,7 @@ class AlgebraParser extends hxparse.Parser<AlgebraLexer, AlgebraToken> implement
 		steps.push(msg);
 	}
 	
-	///*
+	/*
 	override function peek(n:Int) {
 		var t = super.peek(n);
 		step('peek($n): ' + t);

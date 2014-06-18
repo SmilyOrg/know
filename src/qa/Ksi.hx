@@ -134,7 +134,7 @@ class Ksi {
 			case None:
 			case Error(msg):
 				//var display = new SimpleDisplay("<h3 class='provider-name'>"+Type.getClassName(Type.getClass(q.provider))+"</h3>"+msg);
-				var display = new SimpleDisplay(msg);
+				var display = new SimpleDisplay(msg, Irrelevant);
 				queryResultDisplay(q, display);
 			case Item(item, display):
 				pending.add(item);

@@ -1,5 +1,6 @@
+
 body {
-	font-family: 'Roboto';
+	font-family: sans-serif;
 	font-weight: 700;
 	margin: 10px;
 	-webkit-app-region: drag;
@@ -7,6 +8,12 @@ body {
 #input {
 	width: 400px;
 }
+
+#answers {
+    display: flex;
+    flex-direction: column;
+}
+
 #info {
 	font-weight: normal;
 	font-size: 0.9em;
@@ -15,28 +22,18 @@ body {
 
 .info-tag, .info-tag dl {
     display: block;
-    /* height: 30px; */
     background-color: #E7E7E7;
     margin: 0;
 }
 .info-tag dt, .info-tag dd {
     display: inline-block;
     margin: 4px;
-    /* width: 160px; */
     vertical-align: middle;
 }
 .info-tag dt {
     width: 150px;
     color: #9C9898;
 }
-.info-tag dd {
-    /* width: 160px; */
-	
-    /* color: #9C9898; */
-    /* clear: right; */
-    /* content: ""; */
-}
-
 .info-tag-weather i {
     font-size: 50px;
     margin-right: 20px;
@@ -52,6 +49,7 @@ body {
 }
 .outdated {
     opacity: 0.5;
+	order: 100 !important;
 }
 .tokens {
 	margin-top: 1em;
@@ -86,7 +84,6 @@ body {
     border-radius: 6px;
     font-weight: normal;
     margin: 4px 8px;
-    /* vertical-align: middle; */
 }
 .tag-result {
 	background-color: #14BA10;

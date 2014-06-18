@@ -9,15 +9,25 @@ enum Result {
 	Item(item:Dynamic, display:Display);
 }
 
+@:enum
+abstract Relevance(Int) {
+	var Highly = 20;
+	var Somewhat = 10;
+	var Neutral = 0;
+	var Irrelevant = -1;
+}
+
 class Display {
 	public var provider:Provider;
+	public var relevance:Relevance = Neutral;
 	public function apply(element:Element) {};
 }
 
 class SimpleDisplay extends Display {
 	var printed:String;
-	public function new(printed:String) {
+	public function new(printed:String, relevance = Neutral) {
 		this.printed = printed;
+		this.relevance = relevance;
 	}
 	override public function apply(element:Element) {
 		element.innerHTML = "<h3 class='provider-name'>"+Type.getClassName(Type.getClass(provider))+"</h3><div class='content'>"+printed+"</div>";

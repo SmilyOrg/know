@@ -84,8 +84,8 @@ class Know {
 		//input.val("pi");
 		//input.val("pi*2");
 		//input.val("2*pi");
-		//input.val("pi*pi");
-		input.val("log(1+x*(e^3-1))/3");
+		input.val("pi*pi");
+		//input.val("log(1+x*(e^3-1))/3");
 		//input.val("-x^2");
 		//input.val("1-2+x^2-3+4");
 		//input.val("x^2+y^2");
@@ -158,7 +158,26 @@ class Know {
 		var result = getResultElement(answer.display.provider);
 		answer.display.apply(result);
 		//setColor(J(result), Theme.normal);
+		result.dataset.relevance = ""+answer.display.relevance;
+		sortAnswers();
 		typeset(result);
+	}
+	
+	function sortAnswers() {
+		var nodes = answers.children();
+		untyped nodes.sort(sortByRelevance);
+		for (answer in answers.children()) {
+			var element:Element = cast answer;
+			untyped element.style.order = -element.dataset.relevance;
+		}
+		//for (node in nodes) trace((cast(node, Element)).dataset.relevance);
+		//nodes.appendTo(answers);
+	}
+	
+	function sortByRelevance(a:Element, b:Element) {
+		var ra = Std.parseInt(a.dataset.relevance);
+		var rb = Std.parseInt(b.dataset.relevance);
+		return ra > rb ? 1 : ra < rb ? -1 : 0;
 	}
 	
 	function onFinish() {

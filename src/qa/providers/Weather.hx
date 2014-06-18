@@ -167,7 +167,7 @@ class WeatherReportDisplayProvider implements Provider {
 		
 		var report:WeatherReport = item;
 		
-		return new StaticQuery(Item(null, new SimpleDisplay(WeatherPrinter.printReport(report))));
+		return new StaticQuery(Item(null, new SimpleDisplay(WeatherPrinter.printReport(report), Highly)));
 	}
 	
 }
